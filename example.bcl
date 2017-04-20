@@ -1,0 +1,39 @@
+assertion "http_status" "equals_200" {
+    status = "200"
+}
+
+assertion "http_status" "equals_404" {
+    status = "404"
+}
+
+step "http" "step1" {
+    method = "GET"
+    url = "http://google.com"
+
+    assertions = [
+        "${assertion.http_status.equals_200.ref}",
+    ]
+}
+
+step "http" "step2" {
+    method = "GET"
+    url = "http://google.com/not-found"
+
+    assertions = [
+        "${assertion.http_status.equals_404.ref}",
+    ]
+}
+
+test "http" "test-case-1" {
+    steps = [
+        "${step.http.step1.ref}",
+        "${step.http.step2.ref}",
+    ]
+}
+
+test "http" "test-case-2" {
+    steps = [
+        "${step.http.step1.ref}",
+        "${step.http.step2.ref}",
+    ]
+}
