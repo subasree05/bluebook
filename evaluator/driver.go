@@ -2,7 +2,7 @@ package evaluator
 
 import (
 	"fmt"
-	"github.com/bluebookrun/bcl"
+	"github.com/bluebookrun/bluebook/bcl"
 	"io/ioutil"
 	"net/http"
 )

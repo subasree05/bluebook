@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/bluebookrun/bcl"
+	"github.com/bluebookrun/bluebook/bcl"
 	"github.com/bluebookrun/bluebook/evaluator"
 	"github.com/urfave/cli"
 	"io/ioutil"

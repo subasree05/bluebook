@@ -3,7 +3,7 @@ package evaluator
 import (
 	"errors"
 	"fmt"
-	"github.com/bluebookrun/bcl"
+	"github.com/bluebookrun/bluebook/bcl"
 	"net/http"
 )
 
