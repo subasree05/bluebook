@@ -1,9 +1,10 @@
+#
 assertion "http_status" "equals_200" {
-    status = "200"
+    equals = "200"
 }
 
 assertion "http_status" "equals_404" {
-    status = "404"
+    equals = "404"
 }
 
 step "http" "step1" {
