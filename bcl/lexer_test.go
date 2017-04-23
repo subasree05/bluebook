@@ -23,16 +23,63 @@ func TestLexesOperators(t *testing.T) {
 	}
 }
 
+func TestLexesMultilineString(t *testing.T) {
+	l := lex(`<<<EOF
+this is a
+string 123
+EOF`)
+	item := <-l.items
+
+	if item.typ != itemMultiString {
+		t.Errorf("expected multi line string got, %v", item)
+	}
+
+	expectedValue := `this is a
+string 123`
+	if item.value != expectedValue {
+		t.Errorf("multi string value does not match, %v", item)
+	}
+
+	l = lex(`<<<EOF
+multiple lines at the end
+
+
+EOF`)
+
+	item = <-l.items
+
+	if item.typ != itemMultiString {
+		t.Errorf("expected multi line string got, %v", item)
+	}
+
+	expectedValue = `multiple lines at the end
+
+`
+	if item.value != expectedValue {
+		t.Errorf("multi string value does not match, %v", item)
+	}
+
+	l = lex(`<<<EOF
+single line
+EOF`)
+
+	item = <-l.items
+	if item.typ != itemMultiString {
+		t.Errorf("expected multi line string got, %v", item)
+	}
+
+	if item.value != "single line" {
+		t.Errorf("multi string value does not match, %v", item)
+	}
+}
+
 func TestLexesComment(t *testing.T) {
 	l := lex("# this is a comment")
 	item := <-l.items
 
-	if item.typ != itemComment {
-		t.Errorf("expected comment got, %v", item)
-	}
-
-	if item.value != "# this is a comment" {
-		t.Errorf("unexpected comment, %v", item)
+	// comments are ignored
+	if item.typ != itemEOF {
+		t.Errorf("expected EOF got, %v", item)
 	}
 }
 

@@ -2,6 +2,7 @@ package bcl
 
 import (
 	"fmt"
+	"strings"
 	"unicode"
 	"unicode/utf8"
 )
@@ -41,6 +42,7 @@ const (
 	itemError          itemType = iota // error, value is error text
 	itemIdentifier                     // identifier
 	itemString                         // string between double quotes
+	itemMultiString                    // multine line string
 	itemEOF                            // indicates end of file
 	itemComma                          // ,
 	itemComment                        // #
@@ -60,14 +62,15 @@ const (
 )
 
 type lexer struct {
-	input   string
-	state   stateFn
-	width   Pos // number of runes consumed from start
-	pos     Pos // current position in the input
-	start   Pos // start position of this item
-	lastPos Pos // position of the last item returned by nextItem
-	line    int // 1 + number of new lines seen
-	items   chan item
+	input             string
+	state             stateFn
+	width             Pos    // number of runes consumed from start
+	pos               Pos    // current position in the input
+	start             Pos    // start position of this item
+	lastPos           Pos    // position of the last item returned by nextItem
+	line              int    // 1 + number of new lines seen
+	heredocTerminator string // terminator for heredoc strings, e.g. <<<EOF has terminator EOF
+	items             chan item
 }
 
 type stateFn func(*lexer) stateFn
@@ -215,6 +218,42 @@ func lexString(l *lexer) stateFn {
 	return lexStart
 }
 
+func lexMultiString(l *lexer) stateFn {
+	if l.heredocTerminator == "" {
+		return l.errorf("missing heredoc terminator")
+	}
+
+	heredocPos := 0
+
+	// assume first character is a new line
+	c := l.next()
+	if !isNewLine(c) {
+		return l.errorf("expected new line after here doc string")
+	}
+	l.ignore()
+
+	for {
+		c = l.next()
+		switch {
+		case c == eof:
+			return l.errorf("unterminated string")
+		case c == rune(l.heredocTerminator[heredocPos]):
+			heredocPos++
+			if heredocPos >= len(l.heredocTerminator) {
+				oldPos := l.pos
+				l.pos = l.pos - Pos(len(l.heredocTerminator))
+				l.emit(itemMultiString)
+				l.pos = oldPos
+				l.ignore()
+				return lexStart
+			}
+		default:
+			heredocPos = 0
+		}
+	}
+	return nil
+}
+
 func lexComment(l *lexer) stateFn {
 	// everything up to the end of line is a comment
 	for {
@@ -242,7 +281,15 @@ func lexIdentifier(l *lexer) stateFn {
 			// absorb
 		default:
 			l.backup()
-			l.emit(itemIdentifier)
+			word := l.input[l.start:l.pos]
+			if strings.HasPrefix(word, "<<<") {
+				l.ignore()
+				// include \n so that terminator is always on a new line
+				l.heredocTerminator = "\n" + word[3:]
+				return lexMultiString
+			} else {
+				l.emit(itemIdentifier)
+			}
 			return lexStart
 		}
 	}
