@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/bluebookrun/bluebook/bcl"
 	"github.com/bluebookrun/bluebook/evaluator/assertion"
+	"github.com/bluebookrun/bluebook/evaluator/assertion/http_body"
 	"github.com/bluebookrun/bluebook/evaluator/assertion/http_status"
 	"github.com/bluebookrun/bluebook/evaluator/driver"
 	"github.com/bluebookrun/bluebook/evaluator/driver/http"
@@ -15,6 +16,7 @@ import (
 // table of supported assertions and their factory functions
 var assertionFactoryTable = map[string]assertion.FactoryFunc{
 	"http_status": http_status.New,
+	"http_body":   http_body.New,
 }
 
 var stepFactoryTable = map[string]driver.FactoryFunc{

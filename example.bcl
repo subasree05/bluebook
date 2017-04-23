@@ -3,9 +3,19 @@ assertion "http_status" "equals_200" {
     equals = "200"
 }
 
+assertion "http_status" "equals_401" {
+    equals = "401"
+}
+
 assertion "http_status" "equals_404" {
     equals = <<<EOF
 404
+EOF
+}
+
+assertion "http_body" "equals_error" {
+    equals = <<<EOF
+{"meta":{"status":"error"},"error":{"message":"Must provide an api_key"}}
 EOF
 }
 
@@ -27,6 +37,17 @@ step "http" "step2" {
     ]
 }
 
+step "http" "get-order-unauthorized" {
+    method = "GET"
+    url = "https://api.usebutton.com/v1/order/ord-xxxxx"
+
+    assertions = [
+        "${assertion.http_status.equals_401.id}",
+        "${assertion.http_body.equals_error.id}",
+
+    ]
+}
+
 test "http" "test-case-1" {
     steps = [
         "${step.http.step1.id}",
@@ -36,7 +57,6 @@ test "http" "test-case-1" {
 
 test "http" "test-case-2" {
     steps = [
-        "${step.http.step1.id}",
-        "${step.http.step2.id}",
+        "${step.http.get-order-unauthorized.id}",
     ]
 }
