@@ -122,6 +122,13 @@ func (b *BlockNode) String() string {
 		b.Id, b.Driver, b.Name, b.Expressions)
 }
 
+func (b *BlockNode) Ref() string {
+	return fmt.Sprintf("%s.%s.%s",
+		b.Id,
+		b.Driver.Text,
+		b.Name.Text)
+}
+
 func (t *Tree) newBlock(idNode *IdentifierNode, driverNode *StringNode, nameNode *StringNode) *BlockNode {
 	return &BlockNode{
 		NodeType: NodeBlock,
