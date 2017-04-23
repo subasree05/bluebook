@@ -170,7 +170,7 @@ func (t *Tree) parseExpression() *ExpressionNode {
 
 func (t *Tree) parseStringOrList() (node Node) {
 	token := t.nextNonSpaceOrComment()
-	if token.typ == itemString {
+	if token.typ == itemString || token.typ == itemMultiString {
 		node = t.newString(token.value)
 		return
 	}

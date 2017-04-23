@@ -4,7 +4,9 @@ assertion "http_status" "equals_200" {
 }
 
 assertion "http_status" "equals_404" {
-    equals = "404"
+    equals = <<<EOF
+404
+EOF
 }
 
 step "http" "step1" {
