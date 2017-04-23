@@ -1,0 +1,61 @@
+#
+assertion "http_status" "equals_200" {
+    equals = "200"
+}
+
+# extract product.id from json response body and
+# store it in state.product_id
+#outlet "http_json_body" "product_id" {
+#    source = "product.id"
+#    variable = "product_id"
+#}
+
+assertion "http_body" "json-response-body-equals" {
+    equals = <<<EOF
+{"data":["string"]}
+EOF
+}
+
+step "http" "get-json-response" {
+    method = "GET"
+    url = "http://localhost:12345/json-response"
+
+    assertions = [
+        "${assertion.http_status.equals_200.id}",
+        "${assertion.http_body.json-response-body-equals.id}",
+    ]
+}
+
+test "http" "test-http-body-match" {
+    steps = [
+        "${step.http.get-json-response.id}",
+    ]
+}
+
+###
+
+assertion "http_status" "equals_404" {
+    equals = "404"
+}
+
+assertion "http_status" "equals_404_multiline" {
+    equals = <<<EOF
+404
+EOF
+}
+
+step "http" "get-404-page" {
+    method = "GET"
+    url = "http://localhost:12345/404"
+
+    assertions = [
+        "${assertion.http_status.equals_404.id}",
+        "${assertion.http_status.equals_404_multiline.id}",
+    ]
+}
+
+test "http" "status-code-404" {
+    steps = [
+        "${step.http.get-404-page.id}",
+    ]
+}
