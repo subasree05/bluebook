@@ -12,11 +12,11 @@ func getReferenceId(value string) (string, error) {
 		return "", fmt.Errorf("invalid reference id: %q", value)
 	}
 
-	if !strings.HasSuffix(value, ".ref}") {
+	if !strings.HasSuffix(value, ".id}") {
 		return "", fmt.Errorf("invalid reference id: %q", value)
 	}
 
-	return value[2 : len(value)-5], nil
+	return value[2 : len(value)-4], nil
 }
 
 type ProxyType int

@@ -12,7 +12,7 @@ step "http" "step1" {
     url = "http://google.com"
 
     assertions = [
-        "${assertion.http_status.equals_200.ref}",
+        "${assertion.http_status.equals_200.id}",
     ]
 }
 
@@ -21,20 +21,20 @@ step "http" "step2" {
     url = "http://google.com/not-found"
 
     assertions = [
-        "${assertion.http_status.equals_404.ref}",
+        "${assertion.http_status.equals_404.id}",
     ]
 }
 
 test "http" "test-case-1" {
     steps = [
-        "${step.http.step1.ref}",
-        "${step.http.step2.ref}",
+        "${step.http.step1.id}",
+        "${step.http.step2.id}",
     ]
 }
 
 test "http" "test-case-2" {
     steps = [
-        "${step.http.step1.ref}",
-        "${step.http.step2.ref}",
+        "${step.http.step1.id}",
+        "${step.http.step2.id}",
     ]
 }
