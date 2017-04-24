@@ -1,14 +1,18 @@
 #
-assertion "http_status" "equals_200" {
-    equals = "200"
-}
-
 # extract product.id from json response body and
 # store it in state.product_id
 #outlet "http_json_body" "product_id" {
 #    source = "product.id"
 #    variable = "product_id"
 #}
+
+#
+# Response body test
+#
+
+assertion "http_status" "equals_200" {
+    equals = "200"
+}
 
 assertion "http_body" "json-response-body-equals" {
     equals = <<<EOF
@@ -32,7 +36,9 @@ test "http" "test-http-body-match" {
     ]
 }
 
-###
+#
+# Status code test
+#
 
 assertion "http_status" "equals_404" {
     equals = "404"
@@ -57,5 +63,91 @@ step "http" "get-404-page" {
 test "http" "status-code-404" {
     steps = [
         "${step.http.get-404-page.id}",
+    ]
+}
+
+#
+# Request body test
+#
+
+assertion "http_body" "post-body-equals" {
+    equals = <<<EOF
+this is
+some body
+EOF
+}
+
+step "http" "post-body" {
+    method = "POST"
+    url = "http://localhost:12345/echo-body"
+    body = <<<EOF
+this is
+some body
+EOF
+
+    assertions = [
+        "${assertion.http_body.post-body-equals.id}",
+    ]
+}
+
+step "http" "put-body" {
+    method = "PUT"
+    url = "http://localhost:12345/echo-body"
+    body = <<<EOF
+this is
+some body
+EOF
+
+    assertions = [
+        "${assertion.http_body.post-body-equals.id}",
+    ]
+}
+
+step "http" "patch-body" {
+    method = "PATCH"
+    url = "http://localhost:12345/echo-body"
+    body = <<<EOF
+this is
+some body
+EOF
+
+    assertions = [
+        "${assertion.http_body.post-body-equals.id}",
+    ]
+}
+
+step "http" "delete-body" {
+    method = "DELETE"
+    url = "http://localhost:12345/echo-body"
+    body = <<<EOF
+this is
+some body
+EOF
+
+    assertions = [
+        "${assertion.http_body.post-body-equals.id}",
+    ]
+}
+
+step "http" "custom-verb-body" {
+    method = "CUSTOM_VERB"
+    url = "http://localhost:12345/echo-body"
+    body = <<<EOF
+this is
+some body
+EOF
+
+    assertions = [
+        "${assertion.http_body.post-body-equals.id}",
+    ]
+}
+
+test "http" "post-body-echo" {
+    steps = [
+        "${step.http.post-body.id}",
+        "${step.http.put-body.id}",
+        "${step.http.patch-body.id}",
+        "${step.http.delete-body.id}",
+        "${step.http.custom-verb-body.id}",
     ]
 }
