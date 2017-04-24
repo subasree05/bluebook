@@ -9,6 +9,7 @@ import (
 	"github.com/bluebookrun/bluebook/evaluator/state"
 	"io/ioutil"
 	"net/http"
+	"strings"
 )
 
 type Driver struct {
@@ -17,15 +18,18 @@ type Driver struct {
 	Assertions []*proxy.Proxy
 	Method     string
 	Url        string
+	Body       string
 }
 
 func (d *Driver) Exec(s *state.TestState) error {
 	fmt.Printf("executing %s\n", d.Ref)
 
+	bodyReader := strings.NewReader(d.Body)
+
 	// get client via factory from state
 	req, err := http.NewRequest(
 		d.Method,
-		d.Url, nil)
+		d.Url, bodyReader)
 	if err != nil {
 		return err
 	}
@@ -69,6 +73,8 @@ func New(node *bcl.BlockNode) (driver.Driver, error) {
 		Assertions: make([]*proxy.Proxy, 0),
 	}
 
+	// TODO add http headers
+
 	for _, expression := range node.Expressions {
 		switch {
 		case string(expression.Field.Text) == "method":
@@ -84,6 +90,8 @@ func New(node *bcl.BlockNode) (driver.Driver, error) {
 					Type: proxy.ProxyAssertion,
 				})
 			}
+		case string(expression.Field.Text) == "body":
+			d.Body = string(expression.Value.(*bcl.StringNode).Text)
 		}
 	}
 
