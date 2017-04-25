@@ -16,6 +16,7 @@ type Driver struct {
 	Ref        string
 	Node       bcl.Node
 	Assertions []*proxy.Proxy
+	Headers    []string
 	Method     string
 	Url        string
 	Body       string
@@ -32,6 +33,12 @@ func (d *Driver) Exec(s *state.TestState) error {
 		d.Url, bodyReader)
 	if err != nil {
 		return err
+	}
+
+	for i := 0; i < len(d.Headers); i += 2 {
+		name := d.Headers[i]
+		value := d.Headers[i+1]
+		req.Header.Set(name, value)
 	}
 
 	client := &http.Client{}
@@ -71,9 +78,8 @@ func New(node *bcl.BlockNode) (driver.Driver, error) {
 		Ref:        node.Ref(),
 		Node:       node,
 		Assertions: make([]*proxy.Proxy, 0),
+		Headers:    make([]string, 0),
 	}
-
-	// TODO add http headers
 
 	for _, expression := range node.Expressions {
 		switch {
@@ -89,6 +95,17 @@ func New(node *bcl.BlockNode) (driver.Driver, error) {
 					Ref:  string(stringNode.Text),
 					Type: proxy.ProxyAssertion,
 				})
+			}
+		case string(expression.Field.Text) == "headers":
+			// TODO error if not list
+			listNode := expression.Value.(*bcl.ListNode)
+			if len(listNode.Nodes)%2 != 0 {
+				return nil, fmt.Errorf("headers must contain even number of items")
+			}
+
+			for _, node := range listNode.Nodes {
+				stringNode := node.(*bcl.StringNode)
+				d.Headers = append(d.Headers, string(stringNode.Text))
 			}
 		case string(expression.Field.Text) == "body":
 			d.Body = string(expression.Value.(*bcl.StringNode).Text)
