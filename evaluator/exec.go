@@ -3,36 +3,31 @@ package evaluator
 import (
 	"errors"
 	"fmt"
+	//log "github.com/Sirupsen/logrus"
 	"github.com/bluebookrun/bluebook/bcl"
-	"github.com/bluebookrun/bluebook/evaluator/assertion"
-	"github.com/bluebookrun/bluebook/evaluator/assertion/http_body"
-	"github.com/bluebookrun/bluebook/evaluator/assertion/http_status"
-	"github.com/bluebookrun/bluebook/evaluator/driver"
-	"github.com/bluebookrun/bluebook/evaluator/driver/http"
-	"github.com/bluebookrun/bluebook/evaluator/driver/test_http"
+	"github.com/bluebookrun/bluebook/evaluator/resource"
+	"github.com/bluebookrun/bluebook/evaluator/resource/http_assertion_body"
+	"github.com/bluebookrun/bluebook/evaluator/resource/http_assertion_status_code"
+	"github.com/bluebookrun/bluebook/evaluator/resource/http_outlet_header"
+	"github.com/bluebookrun/bluebook/evaluator/resource/http_step"
+	"github.com/bluebookrun/bluebook/evaluator/resource/http_test"
 	"strings"
 )
 
-// table of supported assertions and their factory functions
-var assertionFactoryTable = map[string]assertion.FactoryFunc{
-	"http_status": http_status.New,
-	"http_body":   http_body.New,
-}
-
-var stepFactoryTable = map[string]driver.FactoryFunc{
-	"http": http.New,
-}
-
-var testFactoryTable = map[string]driver.FactoryFunc{
-	"http": test_http.New,
+var resourceFactoryTable = map[string]resource.FactoryFunc{
+	"http_step":                  http_step.New,
+	"http_assertion_status_code": http_assertion_status_code.New,
+	"http_assertion_body":        http_assertion_body.New,
+	"http_test":                  http_test.New,
+	"http_outlet_header":         http_outlet_header.New,
 }
 
 type evaluatorState struct {
-	drivers    map[string]driver.Driver       // map of available drivers
-	assertions map[string]assertion.Assertion // map of assertions
+	refToResourceMap map[string]resource.Resource
+	idToResourceMap  map[string]resource.Resource
 }
 
-func (s *evaluatorState) initializeDrivers(tree *bcl.Tree) error {
+func initializeDrivers(tree *bcl.Tree, executionContext *resource.ExecutionContext) error {
 	for _, node := range tree.Root.Nodes {
 		// all nodes at the root must be block nodes
 		if node.Type() != bcl.NodeBlock {
@@ -40,96 +35,64 @@ func (s *evaluatorState) initializeDrivers(tree *bcl.Tree) error {
 		}
 
 		nodeBlock := node.(*bcl.BlockNode)
-		var err error = nil
 
-		switch {
-		case string(nodeBlock.Id.Text) == "test":
-			if factory, ok := testFactoryTable[string(nodeBlock.Driver.Text)]; ok {
+		if string(nodeBlock.Id.Text) == "resource" {
+			if factory, ok := resourceFactoryTable[string(nodeBlock.Driver.Text)]; ok {
 				d, err := factory(nodeBlock)
 				if err != nil {
 					return err
-				} else {
-					s.addDriver(nodeBlock.Ref(), d)
 				}
-			} else {
-				return fmt.Errorf("unknown assertion: %s", nodeBlock.Driver)
-			}
-		case string(nodeBlock.Id.Text) == "step":
-			if factory, ok := stepFactoryTable[string(nodeBlock.Driver.Text)]; ok {
-				d, err := factory(nodeBlock)
+
+				err = executionContext.AddResource(nodeBlock.Ref(), d)
 				if err != nil {
 					return err
-				} else {
-					s.addDriver(nodeBlock.Ref(), d)
 				}
 			} else {
-				return fmt.Errorf("unknown step: %s", nodeBlock.Driver)
+				return fmt.Errorf("unsupported resource: %s", nodeBlock.Driver)
 			}
-		case string(nodeBlock.Id.Text) == "assertion":
-			if factory, ok := assertionFactoryTable[string(nodeBlock.Driver.Text)]; ok {
-				a, err := factory(nodeBlock)
-				if err != nil {
-					return err
-				} else {
-					s.addAssertion(nodeBlock.Ref(), a)
-				}
-			} else {
-				return fmt.Errorf("unknown assertion: %s", nodeBlock.Driver)
-			}
-		}
-
-		if err != nil {
-			return err
+		} else {
+			return fmt.Errorf("unsupported block type: %s", nodeBlock.Id.Text)
 		}
 	}
 
-	return nil
-}
-
-func (s *evaluatorState) addDriver(ref string, driver driver.Driver) error {
-	s.drivers[ref] = driver
-	return nil
-}
-
-func (s *evaluatorState) addAssertion(ref string, assertion assertion.Assertion) error {
-	s.assertions[ref] = assertion
-	return nil
-}
-
-func (s *evaluatorState) runTests() error {
-	for ref, driver := range s.drivers {
-		if strings.HasPrefix(ref, "test.") {
-			err := driver.Exec(nil)
-			if err != nil {
-				return err
-			}
+	/*
+		log.Debugf("ReferenceToResourceMap:")
+		for key, value := range executionContext.ReferenceToResourceMap {
+			log.Debugf("%s: %p", key, value)
 		}
-	}
-	return nil
-}
 
-func (s *evaluatorState) link() error {
-	for _, driver := range s.drivers {
-		if err := driver.Link(s.drivers, s.assertions); err != nil {
-			return err
+		log.Debugf("IdToResourceMap:")
+		for key, value := range executionContext.IdToResourceMap {
+			log.Debugf("%s: %p", key, value)
 		}
-	}
+	*/
+
 	return nil
 }
 
 // executes parse tree
 func Exec(tree *bcl.Tree) error {
-	evaluatorState := &evaluatorState{
-		drivers:    make(map[string]driver.Driver),
-		assertions: make(map[string]assertion.Assertion),
-	}
-	if err := evaluatorState.initializeDrivers(tree); err != nil {
+	executionContext := resource.NewExecutionContext()
+
+	if err := initializeDrivers(tree, executionContext); err != nil {
 		return err
 	}
 
-	if err := evaluatorState.link(); err != nil {
-		return err
+	// link resources together for execution
+	for _, r := range executionContext.ReferenceToResourceMap {
+		if err := r.Link(executionContext); err != nil {
+			return err
+		}
 	}
 
-	return evaluatorState.runTests()
+	for ref, r := range executionContext.ReferenceToResourceMap {
+		if strings.HasPrefix(ref, "http_test.") {
+			err := r.Exec(executionContext)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }
