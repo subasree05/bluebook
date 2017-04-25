@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"sort"
 )
 
 func JsonResponseHandler(w http.ResponseWriter, req *http.Request) {
@@ -22,9 +23,24 @@ func EchoHandler(w http.ResponseWriter, req *http.Request) {
 	w.Write(data)
 }
 
+func EchoHeadersHandler(w http.ResponseWriter, req *http.Request) {
+	keys := make([]string, 0)
+	for key, _ := range req.Header {
+		keys = append(keys, key)
+	}
+
+	sort.Strings(keys)
+	for _, key := range keys {
+		value := req.Header[key][0]
+		data := []byte(key + ": " + value + "\n")
+		w.Write(data)
+	}
+}
+
 func main() {
 	http.HandleFunc("/404", http.NotFound)
 	http.HandleFunc("/json-response", JsonResponseHandler)
 	http.HandleFunc("/echo-body", EchoHandler)
+	http.HandleFunc("/echo-headers", EchoHeadersHandler)
 	log.Fatal(http.ListenAndServe(":12345", nil))
 }

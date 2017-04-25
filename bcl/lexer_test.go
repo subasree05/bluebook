@@ -71,6 +71,20 @@ EOF`)
 	if item.value != "single line" {
 		t.Errorf("multi string value does not match, %v", item)
 	}
+
+	l = lex(`<<<EOF
+odd number of new lines
+
+EOF`)
+
+	item = <-l.items
+	if item.typ != itemMultiString {
+		t.Errorf("expected multi line string got, %v", item)
+	}
+
+	if item.value != "odd number of new lines\n" {
+		t.Errorf("multi string value does not match, %v", item)
+	}
 }
 
 func TestLexesComment(t *testing.T) {
