@@ -248,7 +248,9 @@ func lexMultiString(l *lexer) stateFn {
 				return lexStart
 			}
 		default:
-			heredocPos = 0
+			for heredocPos > 0 && byte(c) != l.heredocTerminator[heredocPos-1] {
+				heredocPos--
+			}
 		}
 	}
 	return nil
