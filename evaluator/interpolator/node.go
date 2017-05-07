@@ -47,6 +47,10 @@ func (nr *NodeReference) Eval(ctx *resource.ExecutionContext) (string, error) {
 			return *value, nil
 		}
 	} else {
+		if len(tokens) != 3 {
+			return "", fmt.Errorf("invalid reference: %s", nr.Value)
+		}
+
 		resourceReference := fmt.Sprintf("%s.%s", tokens[0], tokens[1])
 		attribute := tokens[2]
 
