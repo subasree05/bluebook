@@ -115,8 +115,6 @@ func (r *Resource) Exec(ctx *resource.ExecutionContext) error {
 		"step": r.Node.Ref(),
 	}).Infof("executing")
 
-	bodyReader := strings.NewReader(r.Body)
-
 	url, err := interpolator.Eval(r.Url, ctx)
 	if err != nil {
 		return err
@@ -126,6 +124,13 @@ func (r *Resource) Exec(ctx *resource.ExecutionContext) error {
 	if err != nil {
 		return err
 	}
+
+	body, err := interpolator.Eval(r.Body, ctx)
+	if err != nil {
+		return err
+	}
+
+	bodyReader := strings.NewReader(body)
 
 	// get client via factory from state
 	req, err := http.NewRequest(
@@ -148,13 +153,11 @@ func (r *Resource) Exec(ctx *resource.ExecutionContext) error {
 	defer resp.Body.Close()
 
 	// todo don't read large bodies
-	body, err := ioutil.ReadAll(resp.Body)
+	ctx.CurrentResponse = resp
+	ctx.CurrentResponseBody, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return err
 	}
-
-	ctx.CurrentResponse = resp
-	ctx.CurrentResponseBody = body
 
 	for _, proxy := range r.Assertions {
 		err = proxy.Resource.Exec(ctx)
