@@ -9,6 +9,7 @@ import (
 	"github.com/bluebookrun/bluebook/evaluator/resource/http_assertion_body"
 	"github.com/bluebookrun/bluebook/evaluator/resource/http_assertion_status_code"
 	"github.com/bluebookrun/bluebook/evaluator/resource/http_outlet_header"
+	"github.com/bluebookrun/bluebook/evaluator/resource/http_outlet_json_field"
 	"github.com/bluebookrun/bluebook/evaluator/resource/http_step"
 	"github.com/bluebookrun/bluebook/evaluator/resource/http_test"
 	"strings"
@@ -20,6 +21,7 @@ var resourceFactoryTable = map[string]resource.FactoryFunc{
 	"http_assertion_body":        http_assertion_body.New,
 	"http_test":                  http_test.New,
 	"http_outlet_header":         http_outlet_header.New,
+	"http_outlet_json_field":     http_outlet_json_field.New,
 }
 
 type evaluatorState struct {

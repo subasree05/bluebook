@@ -9,7 +9,7 @@ import (
 )
 
 func JsonResponseHandler(w http.ResponseWriter, req *http.Request) {
-	io.WriteString(w, "{\"data\":[\"string\"]}")
+	io.WriteString(w, "{\"data\":[\"string\", 555, 123.54, false]}")
 }
 
 func EchoHandler(w http.ResponseWriter, req *http.Request) {
@@ -42,5 +42,6 @@ func main() {
 	http.HandleFunc("/json-response", JsonResponseHandler)
 	http.HandleFunc("/echo-body", EchoHandler)
 	http.HandleFunc("/echo-headers", EchoHeadersHandler)
+	http.HandleFunc("/resource/555", EchoHandler)
 	log.Fatal(http.ListenAndServe(":12345", nil))
 }
