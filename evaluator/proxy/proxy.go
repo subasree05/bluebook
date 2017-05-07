@@ -2,22 +2,9 @@ package proxy
 
 import (
 	"fmt"
-	"github.com/bluebookrun/bluebook/evaluator/assertion"
-	"github.com/bluebookrun/bluebook/evaluator/driver"
-	"strings"
+	"github.com/bluebookrun/bluebook/evaluator/interpolator"
+	"github.com/bluebookrun/bluebook/evaluator/resource"
 )
-
-func getReferenceId(value string) (string, error) {
-	if !strings.HasPrefix(value, "${") {
-		return "", fmt.Errorf("invalid reference id: %q", value)
-	}
-
-	if !strings.HasSuffix(value, ".id}") {
-		return "", fmt.Errorf("invalid reference id: %q", value)
-	}
-
-	return value[2 : len(value)-4], nil
-}
 
 type ProxyType int
 
@@ -27,29 +14,20 @@ const (
 )
 
 type Proxy struct {
-	Ref       string
-	Type      ProxyType
-	Driver    driver.Driver
-	Assertion assertion.Assertion
+	Ref      string
+	Type     ProxyType
+	Resource resource.Resource
 }
 
-func (proxy *Proxy) Resolve(drivers map[string]driver.Driver, assertions map[string]assertion.Assertion) error {
-	refId, err := getReferenceId(proxy.Ref)
+func (proxy *Proxy) Resolve(ctx *resource.ExecutionContext) error {
+	refId, err := interpolator.Eval(proxy.Ref, ctx)
 	if err != nil {
 		return err
 	}
 
-	switch proxy.Type {
-	case ProxyDriver:
-		if d, ok := drivers[refId]; ok {
-			proxy.Driver = d
-			return nil
-		}
-	case ProxyAssertion:
-		if d, ok := assertions[refId]; ok {
-			proxy.Assertion = d
-			return nil
-		}
+	if r := ctx.GetResourceById(refId); r != nil {
+		proxy.Resource = r
+		return nil
 	}
 
 	return fmt.Errorf("reference not found: %s", refId)

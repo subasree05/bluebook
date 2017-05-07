@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	log "github.com/Sirupsen/logrus"
 	"github.com/bluebookrun/bluebook/bcl"
 	"github.com/bluebookrun/bluebook/evaluator"
 	"github.com/urfave/cli"
@@ -9,6 +10,10 @@ import (
 	"os"
 	"strings"
 )
+
+func init() {
+	log.SetLevel(log.DebugLevel)
+}
 
 // creates a canonical string to node map of top level nodes in tree
 func createNodeMap(tree *bcl.Tree) map[string]bcl.Node {

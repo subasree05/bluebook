@@ -123,8 +123,7 @@ func (b *BlockNode) String() string {
 }
 
 func (b *BlockNode) Ref() string {
-	return fmt.Sprintf("%s.%s.%s",
-		b.Id,
+	return fmt.Sprintf("%s.%s",
 		b.Driver.Text,
 		b.Name.Text)
 }

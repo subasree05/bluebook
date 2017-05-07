@@ -6,33 +6,42 @@
 #    variable = "product_id"
 #}
 
+resource "http_outlet_header" "content_type" {
+    source = "Content-Type"
+    variable = "content_type"
+}
+
 #
 # Response body test
 #
 
-assertion "http_status" "equals_200" {
+resource "http_assertion_status_code" "equals_200" {
     equals = "200"
 }
 
-assertion "http_body" "json-response-body-equals" {
+resource "http_assertion_body" "json-response-body-equals" {
     equals = <<<EOF
 {"data":["string"]}
 EOF
 }
 
-step "http" "get-json-response" {
+resource "http_step" "get-json-response" {
     method = "GET"
     url = "http://localhost:12345/json-response"
 
     assertions = [
-        "${assertion.http_status.equals_200.id}",
-        "${assertion.http_body.json-response-body-equals.id}",
+        "${http_assertion_status_code.equals_200.id}",
+        "${http_assertion_body.json-response-body-equals.id}",
+    ]
+
+    outlets = [
+        "${http_outlet_header.content_type.id}",
     ]
 }
 
-test "http" "test-http-body-match" {
+resource "http_test" "test-http-body-match" {
     steps = [
-        "${step.http.get-json-response.id}",
+        "${http_step.get-json-response.id}",
     ]
 }
 
@@ -40,29 +49,29 @@ test "http" "test-http-body-match" {
 # Status code test
 #
 
-assertion "http_status" "equals_404" {
+resource "http_assertion_status_code" "equals_404" {
     equals = "404"
 }
 
-assertion "http_status" "equals_404_multiline" {
+resource "http_assertion_status_code" "equals_404_multiline" {
     equals = <<<EOF
 404
 EOF
 }
 
-step "http" "get-404-page" {
+resource "http_step" "get-404-page" {
     method = "GET"
     url = "http://localhost:12345/404"
 
     assertions = [
-        "${assertion.http_status.equals_404.id}",
-        "${assertion.http_status.equals_404_multiline.id}",
+        "${http_assertion_status_code.equals_404.id}",
+        "${http_assertion_status_code.equals_404_multiline.id}",
     ]
 }
 
-test "http" "status-code-404" {
+resource "http_test" "status-code-404" {
     steps = [
-        "${step.http.get-404-page.id}",
+        "${http_step.get-404-page.id}",
     ]
 }
 
@@ -70,14 +79,14 @@ test "http" "status-code-404" {
 # Request body test
 #
 
-assertion "http_body" "post-body-equals" {
+resource "http_assertion_body" "post-body-equals" {
     equals = <<<EOF
 this is
 some body
 EOF
 }
 
-step "http" "post-body" {
+resource "http_step" "post-body" {
     method = "POST"
     url = "http://localhost:12345/echo-body"
     body = <<<EOF
@@ -86,11 +95,11 @@ some body
 EOF
 
     assertions = [
-        "${assertion.http_body.post-body-equals.id}",
+        "${http_assertion_body.post-body-equals.id}",
     ]
 }
 
-step "http" "put-body" {
+resource "http_step" "put-body" {
     method = "PUT"
     url = "http://localhost:12345/echo-body"
     body = <<<EOF
@@ -99,11 +108,11 @@ some body
 EOF
 
     assertions = [
-        "${assertion.http_body.post-body-equals.id}",
+        "${http_assertion_body.post-body-equals.id}",
     ]
 }
 
-step "http" "patch-body" {
+resource "http_step" "patch-body" {
     method = "PATCH"
     url = "http://localhost:12345/echo-body"
     body = <<<EOF
@@ -112,11 +121,11 @@ some body
 EOF
 
     assertions = [
-        "${assertion.http_body.post-body-equals.id}",
+        "${http_assertion_body.post-body-equals.id}",
     ]
 }
 
-step "http" "delete-body" {
+resource "http_step" "delete-body" {
     method = "DELETE"
     url = "http://localhost:12345/echo-body"
     body = <<<EOF
@@ -125,11 +134,11 @@ some body
 EOF
 
     assertions = [
-        "${assertion.http_body.post-body-equals.id}",
+        "${http_assertion_body.post-body-equals.id}",
     ]
 }
 
-step "http" "custom-verb-body" {
+resource "http_step" "custom-verb-body" {
     method = "CUSTOM_VERB"
     url = "http://localhost:12345/echo-body"
     body = <<<EOF
@@ -138,17 +147,17 @@ some body
 EOF
 
     assertions = [
-        "${assertion.http_body.post-body-equals.id}",
+        "${http_assertion_body.post-body-equals.id}",
     ]
 }
 
-test "http" "post-body-echo" {
+resource "http_test" "post-body-echo" {
     steps = [
-        "${step.http.post-body.id}",
-        "${step.http.put-body.id}",
-        "${step.http.patch-body.id}",
-        "${step.http.delete-body.id}",
-        "${step.http.custom-verb-body.id}",
+        "${http_step.post-body.id}",
+        "${http_step.put-body.id}",
+        "${http_step.patch-body.id}",
+        "${http_step.delete-body.id}",
+        "${http_step.custom-verb-body.id}",
     ]
 }
 
@@ -156,7 +165,7 @@ test "http" "post-body-echo" {
 # Request headers
 #
 
-assertion "http_body" "header-echo" {
+resource "http_assertion_body" "header-echo" {
     equals = <<<EOF
 Accept-Encoding: gzip
 My-Header: header value 1
@@ -166,7 +175,7 @@ X-Header2: value2
 EOF
 }
 
-step "http" "auth-header-request" {
+resource "http_step" "auth-header-request" {
     method = "GET"
     url = "http://localhost:12345/echo-headers"
 
@@ -176,12 +185,12 @@ step "http" "auth-header-request" {
     ]
 
     assertions = [
-        "${assertion.http_body.header-echo.id}",
+        "${http_assertion_body.header-echo.id}",
     ]
 }
 
-test "http" "header-test" {
+resource "http_test" "header-test" {
     steps = [
-        "${step.http.auth-header-request.id}",
+        "${http_step.auth-header-request.id}",
     ]
 }
