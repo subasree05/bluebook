@@ -140,8 +140,15 @@ func (r *Resource) Exec(ctx *resource.ExecutionContext) error {
 	}
 
 	for i := 0; i < len(r.Headers); i += 2 {
-		name := r.Headers[i]
-		value := r.Headers[i+1]
+		name, err := interpolator.Eval(r.Headers[i], ctx)
+		if err != nil {
+			return err
+		}
+
+		value, err := interpolator.Eval(r.Headers[i+1], ctx)
+		if err != nil {
+			return err
+		}
 		req.Header.Set(name, value)
 	}
 
