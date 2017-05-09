@@ -16,6 +16,7 @@ type Resource struct {
 	attributes map[string]string
 	source     string
 	variable   string
+	format     string
 }
 
 func New(node *bcl.BlockNode) (resource.Resource, error) {
@@ -32,7 +33,13 @@ func New(node *bcl.BlockNode) (resource.Resource, error) {
 			r.source = string(expression.Value.(*bcl.StringNode).Text)
 		case string(expression.Field.Text) == "variable":
 			r.variable = string(expression.Value.(*bcl.StringNode).Text)
+		case string(expression.Field.Text) == "format":
+			r.format = string(expression.Value.(*bcl.StringNode).Text)
 		}
+	}
+
+	if r.format == "" {
+		r.format = "unixnano"
 	}
 
 	if err := validateResource(r); err != nil {
@@ -53,6 +60,27 @@ func validateResource(r *Resource) error {
 
 	if r.source != "time" {
 		return fmt.Errorf("%s: invalid `source` value")
+	} else {
+		return validateTime(r)
+	}
+
+	return nil
+}
+
+func validateTime(r *Resource) error {
+	allowedFormats := []string{"unixnano", "unix", "rfc3339"}
+
+	found := false
+	for i := range allowedFormats {
+		if r.format == allowedFormats[i] {
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		return fmt.Errorf("%s: invalid `format` value for source %q",
+			r.Node.Ref(), r.source)
 	}
 
 	return nil
@@ -81,9 +109,19 @@ func (r *Resource) Exec(ctx *resource.ExecutionContext) error {
 		return nil
 	}
 
+	var value string
 	nowUtc := time.Now().UTC()
-	fmt.Printf("%v\n", nowUtc)
-	value := fmt.Sprintf("%d", nowUtc.UnixNano())
+
+	switch r.format {
+	case "unixnano":
+		value = fmt.Sprintf("%d", nowUtc.UnixNano())
+	case "unix":
+		value = fmt.Sprintf("%d", nowUtc.Unix())
+	case "rfc3339":
+		value = nowUtc.Format(time.RFC3339)
+	}
+
+	fmt.Printf("%v\n", value)
 
 	ctx.SetVariable(variable, value)
 	return nil
