@@ -1,13 +1,6 @@
-#
-# extract product.id from json response body and
-# store it in state.product_id
-#outlet "http_json_body" "product_id" {
-#    source = "product.id"
-#    variable = "product_id"
-#}
-
-resource "http_outlet_header" "content_type" {
-    source = "Content-Type"
+resource "http_variable" "content_type" {
+    source = "header"
+    property = "Content-Type"
     variable = "content_type"
 }
 
@@ -34,8 +27,8 @@ resource "http_step" "get-json-response" {
         "${http_assertion_body.json-response-body-equals.id}",
     ]
 
-    outlets = [
-        "${http_outlet_header.content_type.id}",
+    variables = [
+        "${http_variable.content_type.id}",
     ]
 }
 
@@ -198,8 +191,9 @@ resource "http_test" "header-test" {
 #
 # Multi step with json field capture and variable interpolation
 #
-resource "http_outlet_json_field" "field_id" {
-    path = "data[1]"
+resource "http_variable" "field_id" {
+    source = "json"
+    property = "data[1]"
     variable = "field_id"
     numeric_type = "int"
 }
@@ -213,8 +207,8 @@ resource "http_step" "multistep1" {
         "${http_assertion_body.json-response-body-equals.id}",
     ]
 
-    outlets = [
-        "${http_outlet_json_field.field_id.id}",
+    variables = [
+        "${http_variable.field_id.id}",
     ]
 }
 

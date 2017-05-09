@@ -16,7 +16,7 @@ import (
 type Resource struct {
 	Node       *bcl.BlockNode
 	Assertions []*proxy.Proxy
-	Outlets    []*proxy.Proxy
+	Variables  []*proxy.Proxy
 	Headers    []string
 	Method     string
 	Url        string
@@ -50,11 +50,11 @@ func New(node *bcl.BlockNode) (resource.Resource, error) {
 					Type: proxy.ProxyDriver,
 				})
 			}
-		case string(expression.Field.Text) == "outlets":
+		case string(expression.Field.Text) == "variables":
 			listNode := expression.Value.(*bcl.ListNode)
 			for _, stepNode := range listNode.Nodes {
 				stringNode := stepNode.(*bcl.StringNode)
-				d.Outlets = append(d.Outlets, &proxy.Proxy{
+				d.Variables = append(d.Variables, &proxy.Proxy{
 					Ref:  string(stringNode.Text),
 					Type: proxy.ProxyDriver,
 				})
@@ -94,8 +94,8 @@ func (r *Resource) Link(ctx *resource.ExecutionContext) error {
 		}
 	}
 
-	for i := 0; i < len(r.Outlets); i++ {
-		if err := r.Outlets[i].Resolve(ctx); err != nil {
+	for i := 0; i < len(r.Variables); i++ {
+		if err := r.Variables[i].Resolve(ctx); err != nil {
 			return err
 		}
 	}
@@ -174,7 +174,7 @@ func (r *Resource) Exec(ctx *resource.ExecutionContext) error {
 	}
 
 	// capture state for next step
-	for _, proxy := range r.Outlets {
+	for _, proxy := range r.Variables {
 		err = proxy.Resource.Exec(ctx)
 		if err != nil {
 			return err
