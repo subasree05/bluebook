@@ -28,8 +28,9 @@ resource "http_assertion_status_code" "equals_200" {
     equals = "200"
 }
 
-resource "http_outlet_json_field" "api_key" {
-    path = "data.api_key"
+resource "http_variable" "api_key" {
+    source = "json"
+    property = "data.api_key"
     variable = "api_key"
 }
 
@@ -44,8 +45,8 @@ EOF
         "${http_assertion_status_code.equals_200.id}",
     ]
 
-    outlets = [
-        "${http_outlet_json_field.api_key.id}",
+    variables = [
+        "${http_variable.api_key.id}",
     ]
 }
 
