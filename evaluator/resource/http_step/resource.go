@@ -115,6 +115,10 @@ func (r *Resource) Exec(ctx *resource.ExecutionContext) error {
 		"step": r.Node.Ref(),
 	}).Infof("executing")
 
+	// always previous response
+	ctx.CurrentResponse = nil
+	ctx.CurrentResponseBody = []byte{}
+
 	url, err := interpolator.Eval(r.Url, ctx)
 	if err != nil {
 		return err

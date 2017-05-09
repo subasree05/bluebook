@@ -1,3 +1,4 @@
+#
 resource "http_variable" "content_type" {
     source = "header"
     property = "Content-Type"
