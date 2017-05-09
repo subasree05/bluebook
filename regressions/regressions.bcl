@@ -5,6 +5,12 @@ resource "http_variable" "content_type" {
     variable = "content_type"
 }
 
+resource "system_variable" "current_time" {
+    source = "time"
+    variable = "current_time"
+    format = "rfc3339"
+}
+
 #
 # Response body test
 #
@@ -175,7 +181,11 @@ resource "http_step" "auth-header-request" {
 
     headers = [
         "my-header", "header value 1",
-        "x-header2", "value2",
+        "x-header2", "${var.current_time}",
+    ]
+
+    variables = [
+        "${system_variable.current_time.id}"
     ]
 
     assertions = [

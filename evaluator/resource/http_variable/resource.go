@@ -86,12 +86,13 @@ func (r *Resource) GetAttribute(name string) *string {
 }
 
 func (r *Resource) Exec(ctx *resource.ExecutionContext) error {
+	if ctx.CurrentResponse == nil {
+		// capturing variables before the request
+		return nil
+	}
+
 	httpResponse := ctx.CurrentResponse
 	httpBody := ctx.CurrentResponseBody
-
-	if httpResponse == nil {
-		return fmt.Errorf("test state has no response")
-	}
 
 	variable, err := interpolator.Eval(r.variable, ctx)
 	if err != nil {
