@@ -11,6 +11,7 @@ import (
 	"github.com/bluebookrun/bluebook/evaluator/resource/http_step"
 	"github.com/bluebookrun/bluebook/evaluator/resource/http_test"
 	"github.com/bluebookrun/bluebook/evaluator/resource/http_variable"
+	"github.com/bluebookrun/bluebook/evaluator/resource/system_variable"
 	"strings"
 )
 
@@ -20,6 +21,7 @@ var resourceFactoryTable = map[string]resource.FactoryFunc{
 	"http_assertion_body":        http_assertion_body.New,
 	"http_test":                  http_test.New,
 	"http_variable":              http_variable.New,
+	"system_variable":            system_variable.New,
 }
 
 type evaluatorState struct {

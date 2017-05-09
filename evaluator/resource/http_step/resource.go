@@ -119,6 +119,15 @@ func (r *Resource) Exec(ctx *resource.ExecutionContext) error {
 	ctx.CurrentResponse = nil
 	ctx.CurrentResponseBody = []byte{}
 
+	// process variables before the request. This way we can capture
+	// system variables
+	for _, proxy := range r.Variables {
+		err := proxy.Resource.Exec(ctx)
+		if err != nil {
+			return err
+		}
+	}
+
 	url, err := interpolator.Eval(r.Url, ctx)
 	if err != nil {
 		return err
