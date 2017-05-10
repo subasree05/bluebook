@@ -19,8 +19,10 @@ resource "http_assertion_status_code" "equals_200" {
     equals = "200"
 }
 
-resource "http_assertion_body" "json-response-body-equals" {
-    equals = <<<EOF
+resource "http_assertion" "json-response-body-equals" {
+    source = "body"
+    comparison = "equals"
+    target = <<<EOF
 {"data":["string", 555, 123.54, false]}
 EOF
 }
@@ -31,7 +33,7 @@ resource "http_step" "get-json-response" {
 
     assertions = [
         "${http_assertion_status_code.equals_200.id}",
-        "${http_assertion_body.json-response-body-equals.id}",
+        "${http_assertion.json-response-body-equals.id}",
     ]
 
     variables = [
@@ -79,8 +81,10 @@ resource "http_test" "status-code-404" {
 # Request body test
 #
 
-resource "http_assertion_body" "post-body-equals" {
-    equals = <<<EOF
+resource "http_assertion" "post-body-equals" {
+    source = "body"
+    comparison = "equals"
+    target = <<<EOF
 this is
 some body
 EOF
@@ -95,7 +99,7 @@ some body
 EOF
 
     assertions = [
-        "${http_assertion_body.post-body-equals.id}",
+        "${http_assertion.post-body-equals.id}",
     ]
 }
 
@@ -108,7 +112,7 @@ some body
 EOF
 
     assertions = [
-        "${http_assertion_body.post-body-equals.id}",
+        "${http_assertion.post-body-equals.id}",
     ]
 }
 
@@ -121,7 +125,7 @@ some body
 EOF
 
     assertions = [
-        "${http_assertion_body.post-body-equals.id}",
+        "${http_assertion.post-body-equals.id}",
     ]
 }
 
@@ -134,7 +138,7 @@ some body
 EOF
 
     assertions = [
-        "${http_assertion_body.post-body-equals.id}",
+        "${http_assertion.post-body-equals.id}",
     ]
 }
 
@@ -147,7 +151,7 @@ some body
 EOF
 
     assertions = [
-        "${http_assertion_body.post-body-equals.id}",
+        "${http_assertion.post-body-equals.id}",
     ]
 }
 
@@ -165,8 +169,10 @@ resource "http_test" "post-body-echo" {
 # Request headers
 #
 
-resource "http_assertion_body" "header-echo" {
-    equals = <<<EOF
+resource "http_assertion" "header-echo" {
+    source = "body"
+    comparison = "equals"
+    target = <<<EOF
 Accept-Encoding: gzip
 My-Header: header value 1
 User-Agent: Go-http-client/1.1
@@ -181,7 +187,8 @@ resource "http_step" "auth-header-request" {
 
     headers = [
         "my-header", "header value 1",
-        "x-header2", "${var.current_time}",
+        "x-header2", "value2",
+    #    "x-header2", "${var.current_time}",
     ]
 
     variables = [
@@ -189,7 +196,7 @@ resource "http_step" "auth-header-request" {
     ]
 
     assertions = [
-        "${http_assertion_body.header-echo.id}",
+        "${http_assertion.header-echo.id}",
     ]
 }
 
@@ -215,7 +222,7 @@ resource "http_step" "multistep1" {
 
     assertions = [
         "${http_assertion_status_code.equals_200.id}",
-        "${http_assertion_body.json-response-body-equals.id}",
+        "${http_assertion.json-response-body-equals.id}",
     ]
 
     variables = [
