@@ -15,6 +15,15 @@ func init() {
 	log.SetLevel(log.DebugLevel)
 }
 
+func mustGetwd() string {
+	cwd, err := os.Getwd()
+	if err != nil {
+		log.Errorf("Unable to get working directory: %s", err.Error())
+		os.Exit(1)
+	}
+	return cwd
+}
+
 // creates a canonical string to node map of top level nodes in tree
 func createNodeMap(tree *bcl.Tree) map[string]bcl.Node {
 	nodeMap := map[string]bcl.Node{}
@@ -36,13 +45,47 @@ func createNodeMap(tree *bcl.Tree) map[string]bcl.Node {
 	return nodeMap
 }
 
-func parseFile(fileName string) (*bcl.Tree, error) {
-	data, err := ioutil.ReadFile(fileName)
+func parseFiles() (*bcl.Tree, error) {
+	cwd := mustGetwd()
+	files, err := ioutil.ReadDir(cwd)
 	if err != nil {
 		return nil, err
 	}
 
-	return bcl.Parse(string(data))
+	tree := bcl.New()
+
+	fmt.Printf("files: %v\n", files)
+
+	for _, info := range files {
+		if info.IsDir() {
+			continue
+		}
+
+		name := info.Name()
+		if !strings.HasSuffix(name, ".bcl") {
+			continue
+		}
+
+		if err = parseFile(tree, cwd+"/"+name); err != nil {
+			return nil, err
+		}
+	}
+
+	if tree.Root == nil {
+		return nil, fmt.Errorf("No configuration found")
+	}
+
+	return tree, nil
+}
+
+func parseFile(tree *bcl.Tree, fileName string) error {
+	data, err := ioutil.ReadFile(fileName)
+	if err != nil {
+		return err
+	}
+
+	_, err = tree.Parse(string(data))
+	return err
 }
 
 func printAvailableTests(tree *bcl.Tree) {
@@ -67,12 +110,7 @@ func main() {
 			Aliases: []string{"l"},
 			Usage:   "list available tests",
 			Action: func(c *cli.Context) error {
-				fileName := c.Args().Get(0)
-				if fileName == "" {
-					return cli.NewExitError("missing file name", -1)
-				}
-
-				tree, err := parseFile(fileName)
+				tree, err := parseFiles()
 				if err != nil {
 					return cli.NewExitError(fmt.Sprintf("%s", err), -1)
 				}
@@ -86,12 +124,8 @@ func main() {
 			Aliases: []string{"r"},
 			Usage:   "run tests",
 			Action: func(c *cli.Context) error {
-				fileName := c.Args().Get(0)
-				if fileName == "" {
-					return cli.NewExitError("missing file name", -1)
-				}
+				tree, err := parseFiles()
 
-				tree, err := parseFile(fileName)
 				if err != nil {
 					return cli.NewExitError(fmt.Sprintf("%s", err), -1)
 				}
