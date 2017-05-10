@@ -24,27 +24,6 @@ func mustGetwd() string {
 	return cwd
 }
 
-// creates a canonical string to node map of top level nodes in tree
-func createNodeMap(tree *bcl.Tree) map[string]bcl.Node {
-	nodeMap := map[string]bcl.Node{}
-
-	for _, node := range tree.Root.Nodes {
-		if node.Type() != bcl.NodeBlock {
-			continue
-		}
-
-		blockNode := node.(*bcl.BlockNode)
-		key := fmt.Sprintf("%s.%s.%s",
-			blockNode.Id.Text,
-			blockNode.Driver.Text,
-			blockNode.Name.Text)
-
-		nodeMap[key] = node
-	}
-
-	return nodeMap
-}
-
 func parseFiles() (*bcl.Tree, error) {
 	cwd := mustGetwd()
 	files, err := ioutil.ReadDir(cwd)
@@ -53,8 +32,6 @@ func parseFiles() (*bcl.Tree, error) {
 	}
 
 	tree := bcl.New()
-
-	fmt.Printf("files: %v\n", files)
 
 	for _, info := range files {
 		if info.IsDir() {
@@ -90,10 +67,14 @@ func parseFile(tree *bcl.Tree, fileName string) error {
 
 func printAvailableTests(tree *bcl.Tree) {
 	// all tests are at the root of the tree.
-	nodeMap := createNodeMap(tree)
-	for key := range nodeMap {
-		if strings.HasPrefix(key, "test.") {
-			fmt.Printf("%s\n", key)
+	for _, node := range tree.Root.Nodes {
+		if node.Type() != bcl.NodeBlock {
+			continue
+		}
+
+		blockNode := node.(*bcl.BlockNode)
+		if strings.HasPrefix(blockNode.Ref(), "http_test.") {
+			println(blockNode.Ref())
 		}
 	}
 }
