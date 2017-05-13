@@ -4,7 +4,7 @@ API test management and execution.
 
 ## What is Bluebook?
 
-Inspired by Terraform, Bluebook let's you reclare and run API tests for your
+Inspired by Terraform, Bluebook let's you declare and run API tests for your
 services.
 
 ## Installing
@@ -24,8 +24,10 @@ In short you can write API tests that look something like this:
 ```
 # This is an exmaple showing how you can login and make an authenticated request
 
-resource "http_assertion_status_code" "equals_200" {
-    equals = "200"
+resource "http_assertion" "equals_200" {
+    source = "status_code"
+    target = "200"
+    comparison = "equals"
 }
 
 resource "http_variable" "api_key" {
@@ -42,7 +44,7 @@ username=username&password=password
 EOF
 
     assertions = [
-        "${http_assertion_status_code.equals_200.id}",
+        "${http_assertion.equals_200.id}",
     ]
 
     variables = [
@@ -55,7 +57,7 @@ resource "http_step" "get_document" {
     url = "http://localhost:12345/document/1?api_key=${var.api_key}"
 
     assertions = [
-        "${http_assertion_status_code.equals_200.id}",
+        "${http_assertion.equals_200.id}",
     ]
 }
 
