@@ -6,8 +6,7 @@ import (
 	//log "github.com/Sirupsen/logrus"
 	"github.com/bluebookrun/bluebook/bcl"
 	"github.com/bluebookrun/bluebook/evaluator/resource"
-	"github.com/bluebookrun/bluebook/evaluator/resource/http_assertion_body"
-	"github.com/bluebookrun/bluebook/evaluator/resource/http_assertion_status_code"
+	"github.com/bluebookrun/bluebook/evaluator/resource/http_assertion"
 	"github.com/bluebookrun/bluebook/evaluator/resource/http_step"
 	"github.com/bluebookrun/bluebook/evaluator/resource/http_test"
 	"github.com/bluebookrun/bluebook/evaluator/resource/http_variable"
@@ -16,12 +15,11 @@ import (
 )
 
 var resourceFactoryTable = map[string]resource.FactoryFunc{
-	"http_step":                  http_step.New,
-	"http_assertion_status_code": http_assertion_status_code.New,
-	"http_assertion_body":        http_assertion_body.New,
-	"http_test":                  http_test.New,
-	"http_variable":              http_variable.New,
-	"system_variable":            system_variable.New,
+	"http_step":       http_step.New,
+	"http_assertion":  http_assertion.New,
+	"http_test":       http_test.New,
+	"http_variable":   http_variable.New,
+	"system_variable": system_variable.New,
 }
 
 type evaluatorState struct {
