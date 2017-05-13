@@ -4,6 +4,7 @@ import (
 	"github.com/bluebookrun/bluebook/bcl"
 	"github.com/bluebookrun/bluebook/evaluator/resource"
 	"github.com/stretchr/testify/assert"
+	"net/http"
 	"testing"
 )
 
@@ -220,6 +221,174 @@ func TestAssertions(t *testing.T) {
 				CurrentResponseBody: []byte("body"),
 				Variables: map[string]string{
 					"v": "dy",
+				},
+			},
+		},
+		{
+			source:     "status_code",
+			comparison: "equals",
+			target:     "2${var.v}",
+			valid:      true,
+			ctx: &resource.ExecutionContext{
+				CurrentResponse: &http.Response{
+					StatusCode: 200,
+				},
+				Variables: map[string]string{
+					"v": "00",
+				},
+			},
+		},
+		{
+			source:     "status_code",
+			comparison: "equals",
+			target:     "444",
+			valid:      false,
+			ctx: &resource.ExecutionContext{
+				CurrentResponse: &http.Response{
+					StatusCode: 200,
+				},
+			},
+		},
+		{
+			source:     "status_code",
+			comparison: "less_than",
+			target:     "200",
+			valid:      false,
+			ctx: &resource.ExecutionContext{
+				CurrentResponse: &http.Response{
+					StatusCode: 200,
+				},
+			},
+		},
+		{
+			source:     "status_code",
+			comparison: "less_than",
+			target:     "201",
+			valid:      true,
+			ctx: &resource.ExecutionContext{
+				CurrentResponse: &http.Response{
+					StatusCode: 200,
+				},
+			},
+		},
+		{
+			source:     "status_code",
+			comparison: "less_than",
+			target:     "asdf",
+			valid:      false,
+			ctx: &resource.ExecutionContext{
+				CurrentResponse: &http.Response{
+					StatusCode: 200,
+				},
+			},
+		},
+		{
+			source:     "status_code",
+			comparison: "less_than_or_equal",
+			target:     "200",
+			valid:      true,
+			ctx: &resource.ExecutionContext{
+				CurrentResponse: &http.Response{
+					StatusCode: 200,
+				},
+			},
+		},
+		{
+			source:     "status_code",
+			comparison: "less_than_or_equal",
+			target:     "201",
+			valid:      true,
+			ctx: &resource.ExecutionContext{
+				CurrentResponse: &http.Response{
+					StatusCode: 200,
+				},
+			},
+		},
+		{
+			source:     "status_code",
+			comparison: "less_than_or_equal",
+			target:     "asdfasfd",
+			valid:      false,
+			ctx: &resource.ExecutionContext{
+				CurrentResponse: &http.Response{
+					StatusCode: 200,
+				},
+			},
+		},
+		{
+			source:     "status_code",
+			comparison: "less_than_or_equal",
+			target:     "199",
+			valid:      false,
+			ctx: &resource.ExecutionContext{
+				CurrentResponse: &http.Response{
+					StatusCode: 200,
+				},
+			},
+		},
+		{
+			source:     "status_code",
+			comparison: "greater_than",
+			target:     "200",
+			valid:      false,
+			ctx: &resource.ExecutionContext{
+				CurrentResponse: &http.Response{
+					StatusCode: 200,
+				},
+			},
+		},
+		{
+			source:     "status_code",
+			comparison: "greater_than",
+			target:     "199",
+			valid:      true,
+			ctx: &resource.ExecutionContext{
+				CurrentResponse: &http.Response{
+					StatusCode: 200,
+				},
+			},
+		},
+		{
+			source:     "status_code",
+			comparison: "greater_than",
+			target:     "asdf",
+			valid:      false,
+			ctx: &resource.ExecutionContext{
+				CurrentResponse: &http.Response{
+					StatusCode: 200,
+				},
+			},
+		},
+		{
+			source:     "status_code",
+			comparison: "greater_than_or_equal",
+			target:     "200",
+			valid:      true,
+			ctx: &resource.ExecutionContext{
+				CurrentResponse: &http.Response{
+					StatusCode: 200,
+				},
+			},
+		},
+		{
+			source:     "status_code",
+			comparison: "greater_than_or_equal",
+			target:     "201",
+			valid:      false,
+			ctx: &resource.ExecutionContext{
+				CurrentResponse: &http.Response{
+					StatusCode: 200,
+				},
+			},
+		},
+		{
+			source:     "status_code",
+			comparison: "greater_than_or_equal",
+			target:     "asdf",
+			valid:      false,
+			ctx: &resource.ExecutionContext{
+				CurrentResponse: &http.Response{
+					StatusCode: 200,
 				},
 			},
 		},

@@ -6,6 +6,7 @@ import (
 	"github.com/bluebookrun/bluebook/evaluator/interpolator"
 	"github.com/bluebookrun/bluebook/evaluator/resource"
 	"github.com/google/uuid"
+	"strconv"
 	"strings"
 )
 
@@ -96,6 +97,8 @@ func (r *Resource) validate() error {
 		return r.errorf("missing `property`")
 	}
 
+	validComparisons := []string{}
+
 	switch r.source {
 	/*
 		case "json_body":
@@ -125,8 +128,16 @@ func (r *Resource) validate() error {
 				return fmt.Errorf("%s: missing `property`", r.Node.Ref())
 			}
 	*/
+	case "status_code":
+		validComparisons = []string{
+			"equals",
+			"less_than",
+			"less_than_or_equal",
+			"greater_than",
+			"greater_than_or_equal",
+		}
 	case "body":
-		validComparisons := []string{
+		validComparisons = []string{
 			"is_empty",
 			"is_not_empty",
 			"equals",
@@ -134,16 +145,16 @@ func (r *Resource) validate() error {
 			"contains",
 			"does_not_contain",
 		}
-
-		if !stringInSlice(r.comparison, validComparisons) {
-			return r.errorf("invalid `comparison` value %q", r.comparison)
-		}
-
-		if r.target == "" && stringInSlice(r.comparison, comparisonsRequiringTarget) {
-			return r.errorf("invalid `target` value %q", r.target)
-		}
 	default:
 		return r.errorf("invalid `source` value %q", r.source)
+	}
+
+	if !stringInSlice(r.comparison, validComparisons) {
+		return r.errorf("invalid `comparison` value %q", r.comparison)
+	}
+
+	if r.target == "" && stringInSlice(r.comparison, comparisonsRequiringTarget) {
+		return r.errorf("invalid `target` value %q", r.target)
 	}
 
 	return nil
@@ -163,6 +174,8 @@ func (r *Resource) Link(ctx *resource.ExecutionContext) error {
 
 func (r *Resource) Exec(ctx *resource.ExecutionContext) error {
 	switch r.source {
+	case "status_code":
+		return r.assertStatusCode(ctx)
 	case "body":
 		return r.assertBody(ctx)
 	default:
@@ -172,8 +185,66 @@ func (r *Resource) Exec(ctx *resource.ExecutionContext) error {
 }
 
 func (r *Resource) errorf(format string, args ...interface{}) error {
-	newFormat := fmt.Sprintf("%s: %s", r.Node.Ref(), format)
+	//newFormat := fmt.Sprintf("%s: %s", r.Node.Ref(), format)
+	newFormat := r.Node.Ref() + ": " + format
 	return fmt.Errorf(newFormat, args)
+}
+
+func (r *Resource) assertStatusCode(ctx *resource.ExecutionContext) error {
+	target, err := interpolator.Eval(r.target, ctx)
+	if err != nil {
+		return r.errorf("%s", err.Error())
+	}
+
+	statusCode := ctx.CurrentResponse.StatusCode
+
+	switch r.comparison {
+	case "equals":
+		code := fmt.Sprintf("%d", statusCode)
+		if target != code {
+			return r.errorf("equals comparison failed, %s != %s", code, target)
+		}
+	case "less_than":
+		i, err := strconv.Atoi(target)
+		if err != nil {
+			return r.errorf("less_than comparison failed, %s", err.Error())
+		}
+
+		if statusCode >= i {
+			return r.errorf("less_than comparison failed, %d >= %d", statusCode, i)
+		}
+	case "less_than_or_equal":
+		i, err := strconv.Atoi(target)
+		if err != nil {
+			return r.errorf("less_than_or_equal comparison failed, %s", err.Error())
+		}
+
+		if statusCode > i {
+			return r.errorf("less_than_or_equal comparison failed, %d >= %d", statusCode, i)
+		}
+	case "greater_than":
+		i, err := strconv.Atoi(target)
+		if err != nil {
+			return r.errorf("greater_than comparison failed, %s", err.Error())
+		}
+
+		if statusCode <= i {
+			return r.errorf("greater-than comparison failed, %d <= %d", statusCode, i)
+		}
+	case "greater_than_or_equal":
+		i, err := strconv.Atoi(target)
+		if err != nil {
+			return r.errorf("less_than comparison failed, %s", err.Error())
+		}
+
+		if statusCode < i {
+			return r.errorf("less_than comparison failed, %d < %d", statusCode, i)
+		}
+	default:
+		return r.errorf("not implemented comparison %q", r.comparison)
+	}
+
+	return nil
 }
 
 func (r *Resource) assertBody(ctx *resource.ExecutionContext) error {
