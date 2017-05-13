@@ -3,7 +3,7 @@ package evaluator
 import (
 	"errors"
 	"fmt"
-	//log "github.com/Sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
 	"github.com/bluebookrun/bluebook/bcl"
 	"github.com/bluebookrun/bluebook/evaluator/resource"
 	"github.com/bluebookrun/bluebook/evaluator/resource/http_assertion"
@@ -72,6 +72,7 @@ func initializeDrivers(tree *bcl.Tree, executionContext *resource.ExecutionConte
 
 // executes parse tree
 func Exec(tree *bcl.Tree) error {
+	numFailedTests := 0
 	executionContext := resource.NewExecutionContext()
 
 	if err := initializeDrivers(tree, executionContext); err != nil {
@@ -89,10 +90,14 @@ func Exec(tree *bcl.Tree) error {
 		if strings.HasPrefix(ref, "http_test.") {
 			err := r.Exec(executionContext)
 			if err != nil {
-				return err
+				numFailedTests++
+				log.Errorf("%s", err.Error())
 			}
 		}
 	}
 
+	if numFailedTests > 0 {
+		return fmt.Errorf("%d tests failed", numFailedTests)
+	}
 	return nil
 }

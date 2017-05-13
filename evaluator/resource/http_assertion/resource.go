@@ -197,7 +197,7 @@ func (r *Resource) Exec(ctx *resource.ExecutionContext) error {
 
 func (r *Resource) errorf(format string, args ...interface{}) error {
 	newFormat := r.Node.Ref() + ": " + format
-	return fmt.Errorf(newFormat, args)
+	return fmt.Errorf(newFormat, args...)
 }
 
 func (r *Resource) assertStatusCode(ctx *resource.ExecutionContext) error {
