@@ -392,6 +392,46 @@ func TestAssertions(t *testing.T) {
 				},
 			},
 		},
+		{
+			source:     "header",
+			comparison: "is_empty",
+			property:   "Content-Type",
+			valid:      true,
+			ctx: &resource.ExecutionContext{
+				CurrentResponse: &http.Response{
+					StatusCode: 200,
+				},
+			},
+		},
+		{
+			source:     "header",
+			comparison: "is_not_empty",
+			property:   "Content-Type",
+			valid:      false,
+			ctx: &resource.ExecutionContext{
+				CurrentResponse: &http.Response{
+					StatusCode: 200,
+				},
+			},
+		},
+		{
+			source:     "header",
+			comparison: "equals",
+			property:   "Content-Type",
+			target:     "${var.v}",
+			valid:      true,
+			ctx: &resource.ExecutionContext{
+				Variables: map[string]string{
+					"v": "content",
+				},
+				CurrentResponse: &http.Response{
+					StatusCode: 200,
+					Header: http.Header{
+						"Content-Type": []string{"content"},
+					},
+				},
+			},
+		},
 	}
 
 	for _, c := range assertionTestCases {
@@ -489,6 +529,84 @@ func TestInputValidation(t *testing.T) {
 			source:     "body",
 			comparison: "does_not_equal",
 			property:   "",
+			target:     "a",
+			valid:      true,
+		},
+		// header
+		{
+			source:     "header",
+			comparison: "is_empty",
+			property:   "",
+			target:     "",
+			valid:      false,
+		},
+		{
+			source:     "header",
+			comparison: "is_empty",
+			property:   "a",
+			target:     "",
+			valid:      true,
+		},
+		{
+			source:     "header",
+			comparison: "is_not_empty",
+			property:   "a",
+			target:     "",
+			valid:      true,
+		},
+		{
+			source:     "header",
+			comparison: "contains",
+			property:   "a",
+			target:     "",
+			valid:      false,
+		},
+		{
+			source:     "header",
+			comparison: "contains",
+			property:   "a",
+			target:     "a",
+			valid:      true,
+		},
+		{
+			source:     "header",
+			comparison: "does_not_contain",
+			property:   "a",
+			target:     "",
+			valid:      false,
+		},
+		{
+			source:     "header",
+			comparison: "does_not_contain",
+			property:   "a",
+			target:     "a",
+			valid:      true,
+		},
+		{
+			source:     "header",
+			comparison: "equals",
+			property:   "a",
+			target:     "",
+			valid:      false,
+		},
+		{
+			source:     "header",
+			comparison: "equals",
+			property:   "a",
+			target:     "a",
+			valid:      true,
+		},
+		{
+			source:     "header",
+			comparison: "does_not_equal",
+			property:   "a",
+			target:     "",
+			valid:      false,
+		},
+		{
+			source:     "header",
+			comparison: "does_not_equal",
+			property:   "a",
 			target:     "a",
 			valid:      true,
 		},

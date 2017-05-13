@@ -145,6 +145,15 @@ func (r *Resource) validate() error {
 			"contains",
 			"does_not_contain",
 		}
+	case "header":
+		validComparisons = []string{
+			"is_empty",
+			"is_not_empty",
+			"equals",
+			"does_not_equal",
+			"contains",
+			"does_not_contain",
+		}
 	default:
 		return r.errorf("invalid `source` value %q", r.source)
 	}
@@ -178,6 +187,8 @@ func (r *Resource) Exec(ctx *resource.ExecutionContext) error {
 		return r.assertStatusCode(ctx)
 	case "body":
 		return r.assertBody(ctx)
+	case "header":
+		return r.assertHeader(ctx)
 	default:
 		return r.errorf("not implemented source %q", r.source)
 	}
@@ -185,7 +196,6 @@ func (r *Resource) Exec(ctx *resource.ExecutionContext) error {
 }
 
 func (r *Resource) errorf(format string, args ...interface{}) error {
-	//newFormat := fmt.Sprintf("%s: %s", r.Node.Ref(), format)
 	newFormat := r.Node.Ref() + ": " + format
 	return fmt.Errorf(newFormat, args)
 }
@@ -247,6 +257,46 @@ func (r *Resource) assertStatusCode(ctx *resource.ExecutionContext) error {
 	return nil
 }
 
+func (r *Resource) assertText(value string, target string) error {
+	switch r.comparison {
+	case "is_empty":
+		if len(value) != 0 {
+			return r.errorf("is_empty comparison failed, length %d", len(value))
+		}
+	case "is_not_empty":
+		if len(value) == 0 {
+			return r.errorf("is_not_empty comparison failed")
+		}
+	case "equals":
+		if value != target {
+			return r.errorf("equals comparison failed, %q != %q", value, target)
+		}
+	case "does_not_equal":
+		if value == target {
+			return r.errorf("does_not_equal comparison failed, %q == %q", value, target)
+		}
+	case "contains":
+		if target == "" {
+			return r.errorf("contains comparison does not support empty target")
+		}
+
+		if strings.Contains(value, target) == false {
+			return r.errorf("contains comparison failed, %q in %q", target, value)
+		}
+	case "does_not_contain":
+		if target == "" {
+			return r.errorf("does_not_contain comparison does not support empty target")
+		}
+
+		if strings.Contains(value, target) == true {
+			return r.errorf("does_not_contain comparison failed, %q in %q", target, value)
+		}
+	default:
+		return r.errorf("not implemented comparison %q", r.comparison)
+	}
+	return nil
+}
+
 func (r *Resource) assertBody(ctx *resource.ExecutionContext) error {
 	body := ctx.CurrentResponseBody
 	target, err := interpolator.Eval(r.target, ctx)
@@ -254,43 +304,17 @@ func (r *Resource) assertBody(ctx *resource.ExecutionContext) error {
 		return r.errorf("%s", err.Error())
 	}
 
-	switch r.comparison {
-	case "is_empty":
-		if len(body) != 0 {
-			return r.errorf("is_empty comparison failed, body length %d", len(body))
-		}
-	case "is_not_empty":
-		if len(body) == 0 {
-			return r.errorf("is_not_empty comparison failed")
-		}
-	case "equals":
-		if string(body) != target {
-			return r.errorf("equals comparison failed, %q != %q", body, target)
-		}
-	case "does_not_equal":
-		if string(body) == target {
-			return r.errorf("does_not_equal comparison failed, %q == %q", body, target)
-		}
-	case "contains":
-		if target == "" {
-			return r.errorf("contains comparison does not support empty target")
-		}
+	return r.assertText(string(body), target)
+}
 
-		if strings.Contains(string(body), target) == false {
-			return r.errorf("contains comparison failed, %q in %q", target, body)
-		}
-	case "does_not_contain":
-		if target == "" {
-			return r.errorf("does_not_contain comparison does not support empty target")
-		}
-
-		if strings.Contains(string(body), target) == true {
-			return r.errorf("does_not_contain comparison failed, %q in %q", target, body)
-		}
-	default:
-		return r.errorf("not implemented comparison %q", r.comparison)
+func (r *Resource) assertHeader(ctx *resource.ExecutionContext) error {
+	header := ctx.CurrentResponse.Header.Get(r.property)
+	target, err := interpolator.Eval(r.target, ctx)
+	if err != nil {
+		return r.errorf("%s", err.Error())
 	}
-	return nil
+
+	return r.assertText(header, target)
 }
 
 func stringInSlice(s string, list []string) bool {
