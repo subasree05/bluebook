@@ -87,6 +87,14 @@ func (t *Tree) expect(tokenType itemType) item {
 	return token
 }
 
+func (t *Tree) expectStringOrBlockStart() item {
+	token := t.nextNonSpaceOrComment()
+	if token.typ != itemString && token.typ != itemBlockStart {
+		t.errorf("expected string or block start, got %v", token)
+	}
+	return token
+}
+
 // returns next token that's not a comment or a white space
 func (t *Tree) nextNonSpaceOrComment() (token item) {
 	for {
@@ -127,20 +135,33 @@ func (t *Tree) parseBlock() *BlockNode {
 	// current item in the buffer is an identifier
 	identToken := t.expect(itemIdentifier)
 	driverToken := t.expect(itemString)
-	nameToken := t.expect(itemString)
 
-	blockNode := t.newBlock(
-		t.newIdentifier(identToken.value),
-		t.newString(driverToken.value),
-		t.newString(nameToken.value),
-	)
+	token := t.expectStringOrBlockStart()
+	if token.typ == itemBlockStart {
+		blockNode := t.newBlock(
+			t.newIdentifier(identToken.value),
+			t.newString(""),
+			t.newString(driverToken.value),
+		)
 
-	// consume curly brace
-	t.expect(itemBlockStart)
-	blockNode.Expressions = t.parseExpressions()
-	t.expect(itemBlockEnd)
+		blockNode.Expressions = t.parseExpressions()
+		t.expect(itemBlockEnd)
+		return blockNode
+	} else {
+		blockNode := t.newBlock(
+			t.newIdentifier(identToken.value),
+			t.newString(driverToken.value),
+			t.newString(token.value),
+		)
 
-	return blockNode
+		// consume curly brace
+		t.expect(itemBlockStart)
+		blockNode.Expressions = t.parseExpressions()
+		t.expect(itemBlockEnd)
+
+		return blockNode
+	}
+	return nil
 }
 
 func (t *Tree) parseExpressions() []*ExpressionNode {
