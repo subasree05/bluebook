@@ -38,40 +38,70 @@ func New(node *bcl.BlockNode) (resource.Resource, error) {
 	for _, expression := range node.Expressions {
 		switch {
 		case string(expression.Field.Text) == "method":
-			d.Method = string(expression.Value.(*bcl.StringNode).Text)
+			value, err := expression.ValueAsString()
+			if err != nil {
+				return nil, err
+			}
+			d.Method = value
 		case string(expression.Field.Text) == "url":
-			d.Url = string(expression.Value.(*bcl.StringNode).Text)
+			value, err := expression.ValueAsString()
+			if err != nil {
+				return nil, err
+			}
+			d.Url = value
 		case string(expression.Field.Text) == "assertions":
-			listNode := expression.Value.(*bcl.ListNode)
-			for _, stepNode := range listNode.Nodes {
-				stringNode := stepNode.(*bcl.StringNode)
+			listNode, err := expression.ValueAsList()
+			if err != nil {
+				return nil, err
+			}
+			for _, node := range listNode.Nodes {
+				stringNode, ok := node.(*bcl.StringNode)
+				if !ok {
+					return nil, fmt.Errorf("list item is not a string: %s", node)
+				}
 				d.Assertions = append(d.Assertions, &proxy.Proxy{
 					Ref:  string(stringNode.Text),
 					Type: proxy.ProxyDriver,
 				})
 			}
 		case string(expression.Field.Text) == "variables":
-			listNode := expression.Value.(*bcl.ListNode)
-			for _, stepNode := range listNode.Nodes {
-				stringNode := stepNode.(*bcl.StringNode)
+			listNode, err := expression.ValueAsList()
+			if err != nil {
+				return nil, err
+			}
+			for _, node := range listNode.Nodes {
+				stringNode, ok := node.(*bcl.StringNode)
+				if !ok {
+					return nil, fmt.Errorf("list item is not a string: %s", node)
+				}
 				d.Variables = append(d.Variables, &proxy.Proxy{
 					Ref:  string(stringNode.Text),
 					Type: proxy.ProxyDriver,
 				})
 			}
 		case string(expression.Field.Text) == "headers":
-			// TODO error if not list
-			listNode := expression.Value.(*bcl.ListNode)
+			listNode, err := expression.ValueAsList()
+			if err != nil {
+				return nil, err
+			}
+
 			if len(listNode.Nodes)%2 != 0 {
 				return nil, fmt.Errorf("headers must contain even number of items")
 			}
 
 			for _, node := range listNode.Nodes {
-				stringNode := node.(*bcl.StringNode)
+				stringNode, ok := node.(*bcl.StringNode)
+				if !ok {
+					return nil, fmt.Errorf("list item is not a string: %s", node)
+				}
 				d.Headers = append(d.Headers, string(stringNode.Text))
 			}
 		case string(expression.Field.Text) == "body":
-			d.Body = string(expression.Value.(*bcl.StringNode).Text)
+			value, err := expression.ValueAsString()
+			if err != nil {
+				return nil, err
+			}
+			d.Body = value
 		}
 	}
 

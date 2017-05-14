@@ -70,9 +70,14 @@ type ListNode struct {
 
 func (l *ListNode) String() string {
 	b := new(bytes.Buffer)
+	fmt.Fprint(b, "[")
 	for _, n := range l.Nodes {
-		fmt.Fprint(b, n)
+		fmt.Fprintf(b, "%s, ", n)
 	}
+	if b.Len() > 2 {
+		b.Truncate(b.Len() - 2)
+	}
+	fmt.Fprint(b, "]")
 	return b.String()
 }
 
@@ -97,6 +102,20 @@ type ExpressionNode struct {
 
 func (e *ExpressionNode) String() string {
 	return fmt.Sprintf("%s = %s", e.Field, e.Value)
+}
+
+func (e *ExpressionNode) ValueAsString() (string, error) {
+	if valueNode, ok := e.Value.(*StringNode); ok {
+		return string(valueNode.Text), nil
+	}
+	return "", fmt.Errorf("unable to convert expression value to string: %s", e)
+}
+
+func (e *ExpressionNode) ValueAsList() (*ListNode, error) {
+	if listNode, ok := e.Value.(*ListNode); ok {
+		return listNode, nil
+	}
+	return nil, fmt.Errorf("unable to convert expression value to list: %s", e)
 }
 
 func (t *Tree) newExpression(field *IdentifierNode, value Node) *ExpressionNode {

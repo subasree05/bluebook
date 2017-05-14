@@ -75,13 +75,29 @@ func New(node *bcl.BlockNode) (resource.Resource, error) {
 	for _, expression := range node.Expressions {
 		switch {
 		case string(expression.Field.Text) == "source":
-			r.source = string(expression.Value.(*bcl.StringNode).Text)
+			value, err := expression.ValueAsString()
+			if err != nil {
+				return nil, err
+			}
+			r.source = value
 		case string(expression.Field.Text) == "property":
-			r.property = string(expression.Value.(*bcl.StringNode).Text)
+			value, err := expression.ValueAsString()
+			if err != nil {
+				return nil, err
+			}
+			r.property = value
 		case string(expression.Field.Text) == "comparison":
-			r.comparison = string(expression.Value.(*bcl.StringNode).Text)
+			value, err := expression.ValueAsString()
+			if err != nil {
+				return nil, err
+			}
+			r.comparison = value
 		case string(expression.Field.Text) == "target":
-			r.target = string(expression.Value.(*bcl.StringNode).Text)
+			value, err := expression.ValueAsString()
+			if err != nil {
+				return nil, err
+			}
+			r.target = value
 		}
 	}
 

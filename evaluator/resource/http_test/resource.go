@@ -1,6 +1,7 @@
 package http_test
 
 import (
+	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"github.com/bluebookrun/bluebook/bcl"
 	"github.com/bluebookrun/bluebook/evaluator/proxy"
@@ -58,9 +59,15 @@ func New(node *bcl.BlockNode) (resource.Resource, error) {
 	for _, expression := range node.Expressions {
 		switch {
 		case string(expression.Field.Text) == "steps":
-			listNode := expression.Value.(*bcl.ListNode)
-			for _, stepNode := range listNode.Nodes {
-				stringNode := stepNode.(*bcl.StringNode)
+			listNode, err := expression.ValueAsList()
+			if err != nil {
+				return nil, err
+			}
+			for _, node := range listNode.Nodes {
+				stringNode, ok := node.(*bcl.StringNode)
+				if !ok {
+					return nil, fmt.Errorf("steps expression items must be string: %s", expression)
+				}
 				d.Steps = append(d.Steps, &proxy.Proxy{
 					Ref:  string(stringNode.Text),
 					Type: proxy.ProxyDriver,
