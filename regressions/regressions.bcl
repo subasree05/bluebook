@@ -1,4 +1,10 @@
 #
+variable "server_address" {
+    default = "http://localhost:12345"
+}
+
+
+#
 resource "http_variable" "content_type" {
     source = "header"
     property = "Content-Type"
@@ -31,7 +37,7 @@ EOF
 
 resource "http_step" "get-json-response" {
     method = "GET"
-    url = "http://localhost:12345/json-response"
+    url = "${var.server_address}/json-response"
 
     assertions = [
         "${http_assertion.equals_200.id}",
@@ -69,7 +75,7 @@ EOF
 
 resource "http_step" "get-404-page" {
     method = "GET"
-    url = "http://localhost:12345/404"
+    url = "${var.server_address}/404"
 
     assertions = [
         "${http_assertion.equals_404.id}",
@@ -98,7 +104,7 @@ EOF
 
 resource "http_step" "post-body" {
     method = "POST"
-    url = "http://localhost:12345/echo-body"
+    url = "${var.server_address}/echo-body"
     body = <<<EOF
 this is
 some body
@@ -111,7 +117,7 @@ EOF
 
 resource "http_step" "put-body" {
     method = "PUT"
-    url = "http://localhost:12345/echo-body"
+    url = "${var.server_address}/echo-body"
     body = <<<EOF
 this is
 some body
@@ -124,7 +130,7 @@ EOF
 
 resource "http_step" "patch-body" {
     method = "PATCH"
-    url = "http://localhost:12345/echo-body"
+    url = "${var.server_address}/echo-body"
     body = <<<EOF
 this is
 some body
@@ -137,7 +143,7 @@ EOF
 
 resource "http_step" "delete-body" {
     method = "DELETE"
-    url = "http://localhost:12345/echo-body"
+    url = "${var.server_address}/echo-body"
     body = <<<EOF
 this is
 some body
@@ -150,7 +156,7 @@ EOF
 
 resource "http_step" "custom-verb-body" {
     method = "CUSTOM_VERB"
-    url = "http://localhost:12345/echo-body"
+    url = "${var.server_address}/echo-body"
     body = <<<EOF
 this is
 some body
@@ -189,7 +195,7 @@ EOF
 
 resource "http_step" "auth-header-request" {
     method = "GET"
-    url = "http://localhost:12345/echo-headers"
+    url = "${var.server_address}/echo-headers"
 
     headers = [
         "my-header", "header value 1",
@@ -224,7 +230,7 @@ resource "http_variable" "field_id" {
 
 resource "http_step" "multistep1" {
     method = "GET"
-    url = "http://localhost:12345/json-response"
+    url = "${var.server_address}/json-response"
 
     assertions = [
         "${http_assertion.equals_200.id}",
@@ -238,7 +244,7 @@ resource "http_step" "multistep1" {
 
 resource "http_step" "multistep2" {
     method = "GET"
-    url = "http://localhost:12345/resource/${var.field_id}"
+    url = "${var.server_address}/resource/${var.field_id}"
 
     assertions = [
         "${http_assertion.equals_200.id}",
