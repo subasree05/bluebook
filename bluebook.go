@@ -105,13 +105,15 @@ func main() {
 			Aliases: []string{"r"},
 			Usage:   "run tests",
 			Action: func(c *cli.Context) error {
+				testCaseName := c.Args().Get(0)
+
 				tree, err := parseFiles()
 
 				if err != nil {
 					return cli.NewExitError(fmt.Sprintf("%s", err), -1)
 				}
 
-				err = evaluator.Exec(tree)
+				err = evaluator.Exec(tree, testCaseName)
 				if err != nil {
 					return cli.NewExitError(fmt.Sprintf("%s", err), -1)
 				}

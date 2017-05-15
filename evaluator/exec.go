@@ -89,7 +89,7 @@ func initializeDrivers(tree *bcl.Tree, executionContext *resource.ExecutionConte
 }
 
 // executes parse tree
-func Exec(tree *bcl.Tree) error {
+func Exec(tree *bcl.Tree, testCaseName string) error {
 	numFailedTests := 0
 	executionContext := resource.NewExecutionContext()
 
@@ -105,16 +105,32 @@ func Exec(tree *bcl.Tree) error {
 	}
 
 	for ref, r := range executionContext.ReferenceToResourceMap {
-		if strings.HasPrefix(ref, "http_test.") {
-			// TODO reset context
-			for variable, value := range globalVariables {
-				executionContext.SetVariable(variable, value)
-			}
+		if testCaseName == "" {
+			if strings.HasPrefix(ref, "http_test.") {
+				// TODO reset context
+				for variable, value := range globalVariables {
+					executionContext.SetVariable(variable, value)
+				}
 
-			err := r.Exec(executionContext)
-			if err != nil {
-				numFailedTests++
-				log.Errorf("%s", err.Error())
+				err := r.Exec(executionContext)
+				if err != nil {
+					numFailedTests++
+					log.Errorf("%s", err.Error())
+				}
+			}
+		} else {
+			if ref == testCaseName {
+				for variable, value := range globalVariables {
+					executionContext.SetVariable(variable, value)
+				}
+
+				err := r.Exec(executionContext)
+				if err != nil {
+					numFailedTests++
+					log.Errorf("%s", err.Error())
+				}
+
+				break
 			}
 		}
 	}
