@@ -11,6 +11,7 @@ import (
 	"github.com/bluebookrun/bluebook/evaluator/resource/http_test"
 	"github.com/bluebookrun/bluebook/evaluator/resource/http_variable"
 	"github.com/bluebookrun/bluebook/evaluator/resource/system_variable"
+	"os"
 	"strings"
 )
 
@@ -27,6 +28,25 @@ var globalVariables = map[string]string{}
 type evaluatorState struct {
 	refToResourceMap map[string]resource.Resource
 	idToResourceMap  map[string]resource.Resource
+}
+
+func loadVariable(variableBlock *bcl.BlockNode) error {
+	variableName := string(variableBlock.Name.Text)
+
+	if value, ok := os.LookupEnv("BVAR_" + variableName); ok {
+		globalVariables[variableName] = value
+		return nil
+	}
+
+	for _, expression := range variableBlock.Expressions {
+		if string(expression.Field.Text) == "default" {
+			value := string(expression.Value.(*bcl.StringNode).Text)
+			globalVariables[variableName] = value
+			return nil
+		}
+	}
+
+	return fmt.Errorf("variable %s is missing default value", variableName)
 }
 
 func initializeDrivers(tree *bcl.Tree, executionContext *resource.ExecutionContext) error {
@@ -54,20 +74,9 @@ func initializeDrivers(tree *bcl.Tree, executionContext *resource.ExecutionConte
 				return fmt.Errorf("unsupported resource: %s", nodeBlock.Driver)
 			}
 		} else if blockId == "variable" {
-			variableName := string(nodeBlock.Name.Text)
-			variableValue := ""
-			for _, expression := range nodeBlock.Expressions {
-				if string(expression.Field.Text) == "default" {
-					variableValue = string(expression.Value.(*bcl.StringNode).Text)
-					break
-				}
+			if err := loadVariable(nodeBlock); err != nil {
+				return err
 			}
-
-			if len(variableValue) == 0 {
-				return fmt.Errorf("variable %s is missing default value", variableName)
-			}
-
-			globalVariables[variableName] = variableValue
 		} else {
 			return fmt.Errorf("unsupported block type: %s", nodeBlock.Id.Text)
 		}
