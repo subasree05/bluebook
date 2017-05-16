@@ -78,11 +78,17 @@ func validateResource(r *Resource) error {
 		return fmt.Errorf("%s: `property` is required", r.Node.Ref())
 	}
 
-	if (r.numeric_type != "int" && r.numeric_type != "float") && r.source == "json" {
-		return fmt.Errorf("%s: invalid `numeric_type` value, allowed values are 'int' and 'float'")
+	if r.source == "json_body" {
+		if r.numeric_type == "" {
+			r.numeric_type = "int"
+		}
+
+		if r.numeric_type != "int" && r.numeric_type != "float" {
+			return fmt.Errorf("%s: invalid `numeric_type` value, allowed values are 'int' and 'float'")
+		}
 	}
 
-	if r.source != "json" && r.source != "header" {
+	if r.source != "json_body" && r.source != "header" {
 		return fmt.Errorf("%s: invalid `source` value, allowed values are 'json' and 'header'")
 	}
 
@@ -109,11 +115,7 @@ func (r *Resource) Exec(ctx *resource.ExecutionContext) error {
 
 	httpResponse := ctx.CurrentResponse
 	httpBody := ctx.CurrentResponseBody
-
-	variable, err := interpolator.Eval(r.variable, ctx)
-	if err != nil {
-		return nil
-	}
+	variable := r.variable // don't interpolate variables
 
 	property, err := interpolator.Eval(r.property, ctx)
 	if err != nil {
@@ -121,12 +123,12 @@ func (r *Resource) Exec(ctx *resource.ExecutionContext) error {
 	}
 
 	if r.source == "header" {
-		value, ok := httpResponse.Header[r.source]
+		value, ok := httpResponse.Header[r.property]
 		if !ok {
 			return nil
 		}
 		ctx.SetVariable(variable, value[0])
-	} else if r.source == "json" {
+	} else if r.source == "json_body" {
 		value, err := captureJsonVariable(httpBody, property, r.numeric_type == "int")
 		if err != nil {
 			return fmt.Errorf("%s: %s", r.Node.Ref(), err.Error())
