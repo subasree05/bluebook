@@ -49,6 +49,150 @@ var execTestCases = []validationTestCase{
 		},
 		outVars: map[string]string{},
 	},
+	{
+		source:   "json_body",
+		property: "data",
+		variable: "v",
+		valid:    true,
+		inCtx: &resource.ExecutionContext{
+			Variables:           make(map[string]string),
+			CurrentResponseBody: []byte(`{}`),
+		},
+		outVars: map[string]string{},
+	},
+	{
+		source:   "json_body",
+		property: "data",
+		variable: "v",
+		valid:    true,
+		inCtx: &resource.ExecutionContext{
+			Variables:           make(map[string]string),
+			CurrentResponse:     &http.Response{},
+			CurrentResponseBody: []byte(`{"data": "value"}`),
+		},
+		outVars: map[string]string{
+			"v": "value",
+		},
+	},
+	{
+		source:   "json_body",
+		property: "data.list[0]",
+		variable: "v",
+		valid:    true,
+		inCtx: &resource.ExecutionContext{
+			Variables:           make(map[string]string),
+			CurrentResponse:     &http.Response{},
+			CurrentResponseBody: []byte(`{"data": { "list": ["value"] }}`),
+		},
+		outVars: map[string]string{
+			"v": "value",
+		},
+	},
+	{
+		source:   "json_body",
+		property: "data.list[5]",
+		variable: "v",
+		valid:    false,
+		inCtx: &resource.ExecutionContext{
+			Variables:           make(map[string]string),
+			CurrentResponse:     &http.Response{},
+			CurrentResponseBody: []byte(`{"data": { "list": ["value"] }}`),
+		},
+		outVars: map[string]string{},
+	},
+	{
+		source:   "json_body",
+		property: "data.invalid_key",
+		variable: "v",
+		valid:    false,
+		inCtx: &resource.ExecutionContext{
+			Variables:           make(map[string]string),
+			CurrentResponse:     &http.Response{},
+			CurrentResponseBody: []byte(`{"data": { "list": ["value"] }}`),
+		},
+		outVars: map[string]string{},
+	},
+	{
+		source:   "json_body",
+		property: "data",
+		variable: "v",
+		valid:    true,
+		inCtx: &resource.ExecutionContext{
+			Variables:           make(map[string]string),
+			CurrentResponse:     &http.Response{},
+			CurrentResponseBody: []byte(`{"data": true}`),
+		},
+		outVars: map[string]string{
+			"v": "true",
+		},
+	},
+	{
+		source:   "json_body",
+		property: "data",
+		variable: "v",
+		valid:    true,
+		inCtx: &resource.ExecutionContext{
+			Variables:           make(map[string]string),
+			CurrentResponse:     &http.Response{},
+			CurrentResponseBody: []byte(`{"data": false}`),
+		},
+		outVars: map[string]string{
+			"v": "false",
+		},
+	},
+	{
+		source:   "json_body",
+		property: "data",
+		variable: "v",
+		valid:    false,
+		inCtx: &resource.ExecutionContext{
+			Variables:           make(map[string]string),
+			CurrentResponse:     &http.Response{},
+			CurrentResponseBody: []byte(`{"data": {}}`),
+		},
+		outVars: map[string]string{},
+	},
+	{
+		source:       "json_body",
+		property:     "data",
+		variable:     "v",
+		valid:        true,
+		numeric_type: "int",
+		inCtx: &resource.ExecutionContext{
+			Variables:           make(map[string]string),
+			CurrentResponse:     &http.Response{},
+			CurrentResponseBody: []byte(`{"data": 123}`),
+		},
+		outVars: map[string]string{
+			"v": "123",
+		},
+	},
+	{
+		source:   "json_body",
+		property: "data",
+		variable: "v",
+		valid:    true,
+		inCtx: &resource.ExecutionContext{
+			Variables:           make(map[string]string),
+			CurrentResponse:     &http.Response{},
+			CurrentResponseBody: []byte(`{"data": 123}`),
+		},
+		outVars: map[string]string{
+			"v": "123.000000",
+		},
+	},
+	{
+		source:   "json_body",
+		property: "data",
+		variable: "v",
+		valid:    false,
+		inCtx: &resource.ExecutionContext{
+			Variables:           make(map[string]string),
+			CurrentResponse:     &http.Response{},
+			CurrentResponseBody: []byte(`aaa`),
+		},
+		outVars: map[string]string{},
+	},
 }
 
 var testCases = []validationTestCase{
@@ -159,6 +303,7 @@ func TestExec(t *testing.T) {
 			numeric_type: testCase.numeric_type,
 		}
 
+		t.Logf("%v", testCase)
 		err := r.Exec(testCase.inCtx)
 		if testCase.valid {
 			assert.Nil(t, err)
