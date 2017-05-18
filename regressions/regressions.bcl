@@ -222,7 +222,7 @@ resource "http_test" "header-test" {
 # Multi step with json field capture and variable interpolation
 #
 resource "http_variable" "field_id" {
-    source = "json"
+    source = "json_body"
     property = "data[1]"
     variable = "field_id"
     numeric_type = "int"

@@ -84,12 +84,14 @@ func validateResource(r *Resource) error {
 		}
 
 		if r.numeric_type != "int" && r.numeric_type != "float" {
-			return fmt.Errorf("%s: invalid `numeric_type` value, allowed values are 'int' and 'float'")
+			return fmt.Errorf("%s: invalid `numeric_type` value, allowed values are 'int' and 'float'",
+				r.Node.Ref())
 		}
 	}
 
 	if r.source != "json_body" && r.source != "header" {
-		return fmt.Errorf("%s: invalid `source` value, allowed values are 'json' and 'header'")
+		return fmt.Errorf("%s: invalid `source` value, allowed values are 'json_body' and 'header'",
+			r.Node.Ref())
 	}
 
 	return nil
