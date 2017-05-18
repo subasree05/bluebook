@@ -14,6 +14,13 @@ type ExecutionContext struct {
 	Variables              map[string]string
 }
 
+func (ctx *ExecutionContext) Copy() *ExecutionContext {
+	newCtx := NewExecutionContext()
+	newCtx.ReferenceToResourceMap = ctx.ReferenceToResourceMap
+	newCtx.IdToResourceMap = ctx.IdToResourceMap
+	return newCtx
+}
+
 func (ctx *ExecutionContext) AddResource(reference string, resource Resource) error {
 	id := resource.GetAttribute("id")
 	if id == nil {

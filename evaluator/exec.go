@@ -82,18 +82,6 @@ func initializeDrivers(tree *bcl.Tree, executionContext *resource.ExecutionConte
 		}
 	}
 
-	/*
-		log.Debugf("ReferenceToResourceMap:")
-		for key, value := range executionContext.ReferenceToResourceMap {
-			log.Debugf("%s: %p", key, value)
-		}
-
-		log.Debugf("IdToResourceMap:")
-		for key, value := range executionContext.IdToResourceMap {
-			log.Debugf("%s: %p", key, value)
-		}
-	*/
-
 	return nil
 }
 
@@ -116,7 +104,8 @@ func Exec(tree *bcl.Tree, testCaseName string) error {
 	for ref, r := range executionContext.ReferenceToResourceMap {
 		if testCaseName == "" {
 			if strings.HasPrefix(ref, "http_test.") {
-				// TODO reset context
+				// Resets execution context
+				executionContext := executionContext.Copy()
 				for variable, value := range globalVariables {
 					executionContext.SetVariable(variable, value)
 				}

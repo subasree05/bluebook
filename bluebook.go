@@ -12,7 +12,12 @@ import (
 )
 
 func init() {
-	log.SetLevel(log.DebugLevel)
+	logLevelValue := os.Getenv("LOG_LEVEL")
+	if logLevelValue == "DEBUG" {
+		log.SetLevel(log.DebugLevel)
+	} else {
+		log.SetLevel(log.InfoLevel)
+	}
 }
 
 func mustGetwd() string {
