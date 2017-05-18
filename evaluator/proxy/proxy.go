@@ -2,8 +2,8 @@ package proxy
 
 import (
 	"fmt"
-	"github.com/bluebookrun/bluebook/evaluator/interpolator"
 	"github.com/bluebookrun/bluebook/evaluator/resource"
+	"github.com/bluebookrun/bluebook/interpolator"
 )
 
 type ProxyType int

@@ -1,6 +1,7 @@
 package interpolator
 
 import (
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
@@ -30,18 +31,10 @@ func TestParse(t *testing.T) {
 	}
 }
 
-func TestEval(t *testing.T) {
-	s, err := Eval(`
+func TestEvalFailsWhenNoContext(t *testing.T) {
+	_, err := Eval(`
 	this is text ${ ident } more
 	text ${}`, nil)
 
-	if err != nil {
-		t.Errorf("expected no error, got %v", err)
-	}
-
-	if s != `
-	this is text  ident  more
-	text ` {
-		t.Errorf("unexpected evaluator result, %v", s)
-	}
+	assert.NotNil(t, err)
 }
