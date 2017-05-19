@@ -8,8 +8,8 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/bluebookrun/bluebook/bcl"
-	"github.com/bluebookrun/bluebook/evaluator/resource"
 	"github.com/bluebookrun/bluebook/interpolator"
+	"github.com/bluebookrun/bluebook/resource"
 )
 
 type Resource struct {

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/bluebookrun/bluebook/bcl"
 	"github.com/bluebookrun/bluebook/evaluator/proxy"
-	"github.com/bluebookrun/bluebook/evaluator/resource"
+	"github.com/bluebookrun/bluebook/resource"
 	"github.com/google/uuid"
 )
 
