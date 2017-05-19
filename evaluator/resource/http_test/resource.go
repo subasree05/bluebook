@@ -2,7 +2,6 @@ package http_test
 
 import (
 	"fmt"
-	log "github.com/Sirupsen/logrus"
 	"github.com/bluebookrun/bluebook/bcl"
 	"github.com/bluebookrun/bluebook/evaluator/proxy"
 	"github.com/bluebookrun/bluebook/evaluator/resource"
@@ -16,17 +15,11 @@ type Resource struct {
 }
 
 func (d *Resource) Exec(ctx *resource.ExecutionContext) error {
-	contextLogger := log.WithFields(log.Fields{
-		"test": d.Node.Ref(),
-	})
-
-	contextLogger.Infof("start")
 	for _, proxy := range d.Steps {
 		if err := proxy.Resource.Exec(ctx); err != nil {
 			return err
 		}
 	}
-	contextLogger.Infof("complete")
 	return nil
 }
 
@@ -47,7 +40,7 @@ func (d *Resource) GetAttribute(name string) *string {
 	return &value
 }
 
-func New(node *bcl.BlockNode) (resource.Resource, error) {
+func New(node *bcl.BlockNode) (*Resource, error) {
 	d := &Resource{
 		Node:  node,
 		Steps: make([]*proxy.Proxy, 0),

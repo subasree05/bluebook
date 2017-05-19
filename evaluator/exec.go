@@ -3,7 +3,6 @@ package evaluator
 import (
 	"errors"
 	"fmt"
-	log "github.com/Sirupsen/logrus"
 	"github.com/bluebookrun/bluebook/bcl"
 	"github.com/bluebookrun/bluebook/evaluator/resource"
 	"github.com/bluebookrun/bluebook/evaluator/resource/http_assertion"
@@ -14,14 +13,6 @@ import (
 	"os"
 	"strings"
 )
-
-var resourceFactoryTable = map[string]resource.FactoryFunc{
-	"http_step":       http_step.New,
-	"http_assertion":  http_assertion.New,
-	"http_test":       http_test.New,
-	"http_variable":   http_variable.New,
-	"system_variable": system_variable.New,
-}
 
 var globalVariables = map[string]string{}
 
@@ -60,25 +51,40 @@ func initializeDrivers(tree *bcl.Tree, executionContext *resource.ExecutionConte
 		blockId := string(nodeBlock.Id.Text)
 
 		if blockId == "resource" {
-			if factory, ok := resourceFactoryTable[string(nodeBlock.Driver.Text)]; ok {
-				d, err := factory(nodeBlock)
-				if err != nil {
-					return err
-				}
+			driverId := string(nodeBlock.Driver.Text)
 
-				err = executionContext.AddResource(nodeBlock.Ref(), d)
-				if err != nil {
-					return err
-				}
-			} else {
-				return fmt.Errorf("unsupported resource: %s", nodeBlock.Driver)
+			var res resource.Resource
+			var err error
+
+			switch driverId {
+			case "http_step":
+				res, err = http_step.New(nodeBlock)
+			case "http_assertion":
+				res, err = http_assertion.New(nodeBlock)
+			case "http_test":
+				res, err = http_test.New(nodeBlock)
+			case "http_variable":
+				res, err = http_variable.New(nodeBlock)
+			case "system_variable":
+				res, err = system_variable.New(nodeBlock)
+			default:
+				return fmt.Errorf("Unsupported resource: %s", nodeBlock.Ref())
+			}
+
+			if err != nil {
+				return fmt.Errorf("Failed to initialize resource %s: %s", nodeBlock.Ref(), err.Error())
+			}
+
+			err = executionContext.AddResource(nodeBlock.Ref(), res)
+			if err != nil {
+				return fmt.Errorf("Failed to add resource to the execution context: %s", err.Error())
 			}
 		} else if blockId == "variable" {
 			if err := loadVariable(nodeBlock); err != nil {
-				return err
+				return fmt.Errorf("Failed to load variable: %s", err.Error())
 			}
 		} else {
-			return fmt.Errorf("unsupported block type: %s", nodeBlock.Id.Text)
+			return fmt.Errorf("Unknown configuration block type: %s", nodeBlock.Id.Text)
 		}
 	}
 
@@ -104,6 +110,7 @@ func Exec(tree *bcl.Tree, testCaseName string) error {
 	for ref, r := range executionContext.ReferenceToResourceMap {
 		if testCaseName == "" {
 			if strings.HasPrefix(ref, "http_test.") {
+				fmt.Printf("%s\n", ref)
 				// Resets execution context
 				executionContext := executionContext.Copy()
 				for variable, value := range globalVariables {
@@ -113,11 +120,12 @@ func Exec(tree *bcl.Tree, testCaseName string) error {
 				err := r.Exec(executionContext)
 				if err != nil {
 					numFailedTests++
-					log.Errorf("%s", err.Error())
+					fmt.Printf("  error: %s\n", err.Error())
 				}
 			}
 		} else {
 			if ref == testCaseName {
+				fmt.Printf("%s\n", ref)
 				for variable, value := range globalVariables {
 					executionContext.SetVariable(variable, value)
 				}
@@ -125,9 +133,8 @@ func Exec(tree *bcl.Tree, testCaseName string) error {
 				err := r.Exec(executionContext)
 				if err != nil {
 					numFailedTests++
-					log.Errorf("%s", err.Error())
+					fmt.Printf("  error: %s\n", err.Error())
 				}
-
 				break
 			}
 		}
@@ -135,6 +142,8 @@ func Exec(tree *bcl.Tree, testCaseName string) error {
 
 	if numFailedTests > 0 {
 		return fmt.Errorf("%d tests failed", numFailedTests)
+	} else {
+		fmt.Printf("All tests passed\n")
 	}
 	return nil
 }

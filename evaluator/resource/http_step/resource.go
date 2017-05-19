@@ -2,7 +2,6 @@ package http_step
 
 import (
 	"fmt"
-	log "github.com/Sirupsen/logrus"
 	"github.com/bluebookrun/bluebook/bcl"
 	"github.com/bluebookrun/bluebook/evaluator/proxy"
 	"github.com/bluebookrun/bluebook/evaluator/resource"
@@ -25,7 +24,7 @@ type Resource struct {
 	attributes map[string]string
 }
 
-func New(node *bcl.BlockNode) (resource.Resource, error) {
+func New(node *bcl.BlockNode) (*Resource, error) {
 	d := &Resource{
 		Node:       node,
 		Assertions: make([]*proxy.Proxy, 0),
@@ -141,10 +140,7 @@ func (r *Resource) GetAttribute(name string) *string {
 }
 
 func (r *Resource) Exec(ctx *resource.ExecutionContext) error {
-	log.WithFields(log.Fields{
-		"step": r.Node.Ref(),
-	}).Infof("executing")
-
+	fmt.Printf("  %s\n", r.Node.Ref())
 	// always previous response
 	ctx.CurrentResponse = nil
 	ctx.CurrentResponseBody = []byte{}

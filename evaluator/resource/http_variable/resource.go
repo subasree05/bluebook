@@ -21,7 +21,7 @@ type Resource struct {
 	numeric_type string
 }
 
-func New(node *bcl.BlockNode) (resource.Resource, error) {
+func New(node *bcl.BlockNode) (*Resource, error) {
 	r := &Resource{
 		Node: node,
 		attributes: map[string]string{

@@ -2,7 +2,6 @@ package resource
 
 import (
 	"fmt"
-	"github.com/bluebookrun/bluebook/bcl"
 	"net/http"
 )
 
@@ -70,5 +69,3 @@ type Resource interface {
 	Exec(*ExecutionContext) error
 	GetAttribute(string) *string
 }
-
-type FactoryFunc func(node *bcl.BlockNode) (Resource, error)
