@@ -7,8 +7,8 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/bluebookrun/bluebook/bcl"
-	"github.com/bluebookrun/bluebook/evaluator/resource"
 	"github.com/bluebookrun/bluebook/interpolator"
+	"github.com/bluebookrun/bluebook/resource"
 )
 
 type Resource struct {
@@ -19,7 +19,7 @@ type Resource struct {
 	format     string
 }
 
-func New(node *bcl.BlockNode) (resource.Resource, error) {
+func New(node *bcl.BlockNode) (*Resource, error) {
 	r := &Resource{
 		Node: node,
 		attributes: map[string]string{

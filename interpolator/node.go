@@ -2,7 +2,7 @@ package interpolator
 
 import (
 	"fmt"
-	"github.com/bluebookrun/bluebook/evaluator/resource"
+	"github.com/bluebookrun/bluebook/resource"
 	"strings"
 )
 

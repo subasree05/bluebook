@@ -2,7 +2,7 @@ package http_assertion
 
 import (
 	"github.com/bluebookrun/bluebook/bcl"
-	"github.com/bluebookrun/bluebook/evaluator/resource"
+	"github.com/bluebookrun/bluebook/resource"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"testing"

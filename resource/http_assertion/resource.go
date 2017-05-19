@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/bluebookrun/bluebook/bcl"
-	"github.com/bluebookrun/bluebook/evaluator/resource"
 	"github.com/bluebookrun/bluebook/interpolator"
+	"github.com/bluebookrun/bluebook/resource"
 	"github.com/firewut/go-json-map"
 	"github.com/google/uuid"
 	"strconv"
@@ -39,7 +39,7 @@ var sourceRequiringProperty = []string{
 	"header",
 }
 
-func New(node *bcl.BlockNode) (resource.Resource, error) {
+func New(node *bcl.BlockNode) (*Resource, error) {
 	r := &Resource{
 		Node: node,
 		attributes: map[string]string{
