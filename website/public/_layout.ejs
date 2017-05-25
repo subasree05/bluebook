@@ -1,0 +1,13 @@
+<html>
+<head>
+  <%- partial("_partials/head") %>
+</head>
+<body>
+  <%- partial("_partials/header", { landing_page: true }) %>
+  <div class="container">
+    <%- yield %>
+  </div>
+  <%- partial("_partials/footer") %>
+  <%- partial("_partials/google-analytics") %>
+</body>
+</html>

@@ -1,0 +1,32 @@
+{
+  "index": {
+    "layout": "../../_layout_docs.ejs",
+    "page_header_title": "Resources",
+    "page_header_description": "Build API, integration, and end-to-end tests.",
+    "page_title": "Resources"
+  },
+  "http_assertion": {
+    "layout": "../../_layout_docs.ejs",
+    "page_header_title": "http_assertion",
+    "page_header_description": "Validate HTTP responses.",
+    "page_title": "http_assertion"
+  },
+  "http_variable": {
+    "page_header_title": "http_variable",
+    "page_header_description": "Capture data from HTTP responses and reuse it later.",
+    "layout": "../../_layout_docs.ejs",
+    "page_title": "http_variable"
+  },
+  "http_step": {
+    "page_header_title": "http_step",
+    "page_header_description": "Configure HTTP request.",
+    "layout": "../../_layout_docs.ejs",
+    "page_title": "http_step"
+  },
+  "http_test": {
+    "page_header_title": "http_test",
+    "page_header_description": "Configure HTTP test case.",
+    "layout": "../../_layout_docs.ejs",
+    "page_title": "http_test"
+  }
+}

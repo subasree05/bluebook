@@ -1,0 +1,98 @@
+@footer-height: 60px;
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  // margin bottom by footer height;
+  margin-bottom: @footer-height;
+}
+
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  /* Set the fixed height of the footer here */
+  height: @footer-height;
+  line-height: @footer-height;
+  border-top: 1px solid #f3f3f3;
+}
+
+.jumbotron {
+  margin-top: 60px;
+}
+
+.bb-navbar {
+  margin: 0;
+  padding: 0;
+  border-bottom: 1px solid #ccc;
+  background-color: #f8f8f8;
+}
+
+.bb-navbar-landing {
+  border-bottom: none;
+  background-color: transparent;
+
+  .nav {
+    a, a:hover, a:focus, a:active, a:visited {
+      background-color: transparent;
+    }
+  }
+}
+
+.bb-docs-header {
+  margin: 0;
+//  padding-top: 60px;
+  padding-bottom: 60px;
+//  background-color: #333;
+//  color: #fff;
+
+//  background: rgb(6,41,68);
+
+  p {
+    font-size: 24px;
+    font-weight: lighter;
+  }
+}
+
+.bb-docs-sidebar {
+  color: red;
+}
+
+.bb-docs-sidenav {
+  margin-top: 20px;
+
+  li {
+    display: block;
+
+    a {
+      background-color: transparent;
+    }
+
+    a:hover {
+      background-color: transparent;
+    }
+
+    a:active {
+      background-color: transparent;
+    }
+
+    a:visited {
+      background-color: transparent;
+    }
+
+    a:focus {
+      background-color: transparent;
+    }
+  }
+}
+
+.bb-docs-sidenav-level2 {
+  margin-left: 24px;
+
+  li {
+    display: block;
+  }
+}

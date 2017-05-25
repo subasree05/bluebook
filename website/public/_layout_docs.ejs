@@ -1,0 +1,26 @@
+<html>
+<head>
+  <%- partial("_partials/head") %>
+</head>
+<body>
+  <%- partial("_partials/header") %>
+
+  <div class="container">
+    <div class="row">
+      <div class="col-md-3">
+        <%- partial(locals.sidenav_template || "_partials/docs-sidenav") %>
+      </div>
+      <div class="col-md-9">
+        <div class="bb-docs-header">
+          <h1><%- locals.page_header_title || public.docs._data.globals.page_header_title %></h1>
+          <p><%- locals.page_header_description || public.docs._data.globals.page_header_description %></p>
+        </div>
+        <%- yield %>
+      </div>
+    </div>
+  </div>
+
+  <%- partial("_partials/footer") %>
+  <%- partial("_partials/google-analytics") %>
+</body>
+</html>

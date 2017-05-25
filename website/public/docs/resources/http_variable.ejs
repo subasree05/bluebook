@@ -1,0 +1,65 @@
+    <div class="bb-docs-section" id="variables">
+      <p>HTTP variables let you capture request data from an HTTP response. The
+      chaptured data can be accessed in subsequent test steps.</p>
+
+      <h3>Example</h3>
+
+      <pre>resource "http_variable" "my_variable" {
+  source = "json_body"
+  property = "data[0].key"
+  variable = "some_key"
+}
+
+resource "http_step" "step" {
+    url = "http://localhost/?key=${var.some_key}",
+    ...
+}</pre>
+
+      <h3>Inputs</h3>
+
+      <ul>
+        <li><code>source</code> &mdash; location of the response value that we want to capture.</li>
+        <li><code>variable</code> &mdash; variable name for referencing the captured value later.</li>
+        <li><code>property</code> &mdash; property name of the source (<code>json_body</code> and <code>header</code> sources only).</li>
+        <li><code>numeric_type</code> (optional) &mdash; treatment of numeric values (<code>json_body</code> only, default <code>int</code>).</li>
+      </ul>
+
+      <h4>Sources</h4>
+
+      <ul>
+        <li><code>header</code> &mdash; response header.</li>
+        <li><code>json_body</code> &mdash; JSON response body.</li>
+      </ul>
+
+      <h4>Numeric type</h4>
+
+      <p>Variables are always captured as strings from the response body. When
+      using <code>json_body</code> source with a property pointing to a JSON
+      number field, we can use <code>numeric_type</code> to choose how we want
+      to parse the number.</p>
+
+      Allowed options are:
+      <ul>
+        <li><code>int</code> &mdash; numeric value will be parsed as an integer, e.g <code>1.0</code> will be captured as a string <code>1</code>.</li>
+        <li><code>float</code> &mdash; numeric value will be parsed as a floating point number, e.g. <code>1.0</code> will be captured as a string <code>1.0</code>.</li>
+      </ul>
+
+      <h4>Properties</h4>
+      <p>Property is an additional piece of information that some value sources require to located the data.
+
+      <p><code>header</code> source uses property to find HTTP header for comparison:</p>
+
+      <pre>source = "header"
+target = "Content-Type"</pre>
+
+      <p><code>json_body</code> source uses property to find attribute within JSON object:</p>
+
+      <pre>source = "json_body"
+target = "data.key[0]"</pre>
+
+      <h3>Outputs</h3>
+      <ul>
+        <li><code>id</code> - resource ID.</li>
+      </ul>
+
+    </div>

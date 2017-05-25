@@ -1,0 +1,93 @@
+    <div class="bb-docs-section" id="top">
+      <p>Bluebook Configuration Language (BCL) is heavily inspired by HCL and Terraform. It is actually a ligher
+      version of HCL. BCL is used to write API tests and any supporting configuration for your tests.</p>
+    </div>
+    <div class="bb-docs-section" id="block-syntax">
+      <h2>Block syntax</h2>
+
+      <p>Configuration blocks are used to group relevant information together.
+      A block consists of block type, driver name, block name, and block
+      inputs.</p>
+
+      <pre>blockType "driver" blockName {
+    inputs
+}</pre>
+
+      <p>Block type identifies configuration type, e.g. resource or variable.
+      Different block types have different behavior when
+      evaluated. Driver identifies runtime driver for the block type. Drivers
+      can include things such as assertions or HTTP requests. Block name is
+      used to uniquely identify configuration block within your test
+      configuration. Blocks can be referenced by other blocks using
+      interpolation syntax. Block inputs are written using expression syntax.</p>
+    </div>
+
+    <div class="bb-docs-section" id="expressions">
+      <h2>Expressions</h2>
+      <p>BCL only understand assignment expressions. Every assignment expression starts with
+      an identifier followed by assignment operator and a value.</p>
+
+      <pre>identifier = "value"</pre>
+
+      <p>Values can only be strings or lists.</p>
+    </div>
+
+    <div class="bb-docs-section" id="types">
+      <h2>Types</h2>
+      <h3>Strings</h3>
+      <p>String values are written between double quotes:</p>
+      <pre>"this is a string"</pre>
+
+      <p>Multi-line strings can be written in shell-style "here doc" syntax.</p>
+
+      <pre>&lt;&lt;&lt;EOF
+this is
+a multi-line
+string
+EOF</pre>
+
+      <h3>Lists</h3>
+      <p>List values start with <code>[</code> and end with <code>]</code>. List can only contain
+      string values.</p>
+
+      <pre>[
+  "item1",
+  "item2",
+]</pre>
+    </div>
+
+    <div class="bb-docs-section" id="comments">
+      <h2>Comments</h2>
+
+      <p>Comments can start anywhere outside strings values. Comments start
+      with <code>#</code> symbol and end at the new line.</p>
+
+      <pre># create a new test
+resource "http_test" "my_test" {
+    steps = [] # a list of steps
+}
+
+# resource "http_test" "commented_out" {
+# }</div>
+
+    <div class="bb-docs-section" id="interpolation-syntax">
+      <h2>Interpolation syntax</h2>
+
+      <p>Any string within an expression gets interpolated. Interpolation
+      syntax is used for variable substitution or evaluation of built-in
+      functions.</p>
+
+      <pre>variable = "value ${var.my_variable}"</pre>
+
+      <p>Above is an example of string interpolation. Anything between
+      <code>${</code> and <code>}</code> will be evaluated by the interpolator.
+      Interpolation block will be replaced with the output returned by the
+      interpolator.</p>
+      
+      <p>Assume that <code>var.my_variable</code> is set to <code>123</code>. When interpolator
+      finishes processing the string, the result is going to be:</p>
+
+      <pre>variable = "value 123"</pre>
+
+      <p>Interpolation always happens before driver execution.</p>
+    </div>

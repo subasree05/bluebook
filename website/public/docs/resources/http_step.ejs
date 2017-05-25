@@ -1,0 +1,41 @@
+    <div class="bb-docs-section" id="variables">
+      <p>HTTP requests are configured and performed with <code>http_step</code> resource.</p>
+
+      <h3>Example</h3>
+
+      <pre>resource "http_step" "my_step" {
+    method = "POST"
+    url = "http://localhost/endpoint"
+    body = &lt;&lt;&lt;EOF
+{
+    "some": "data"
+}
+EOF
+
+    headers = [
+        "Content-Type", "application/json",
+        "X-My-Header", "custom header value",
+    ]
+
+    assertions = [
+        "${http_assertion.equals_200.id}",
+    ]
+}</pre>
+
+      <h3>Inputs</h3>
+
+      <ul>
+        <li><code>method</code> &mdash; HTTP request method.</li>
+        <li><code>url</code> &mdash; Request URL, must include scheme.</li>
+        <li><code>body</code> (optional) &mdash; Request body.</li>
+        <li><code>headers</code> (optional) &mdash; a list of request header values. Header value follows header name.</li>
+        <li><code>assertions</code> (optional) &mdash; a list of assertions to perform on the response of the request.</li>
+        <li><code>variables</code> (optional) &mdash; a list of variables to render before the request or capture from the response.</li>
+      </ul>
+
+      <h3>Outputs</h3>
+      <ul>
+        <li><code>id</code> - resource ID.</li>
+      </ul>
+
+    </div>

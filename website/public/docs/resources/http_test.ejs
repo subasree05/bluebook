@@ -1,0 +1,35 @@
+    <div class="bb-docs-section" id="variables">
+      <p>HTTP requests are grouped into test cases. Test cases can be executed with Bluebook CLI.</p>
+      <p>Each test case can also have one or more requests, where each request will be exeucted
+      in the order they are listed.</p>
+
+      <h3>Example</h3>
+
+      <pre>resource "http_test" "my_test_case" {
+    steps = [
+        ${http_step.my_step1.id},
+        ${http_step.my_step2.id},
+    ]
+}
+
+resource "http_step" "my_step1" {
+    ...
+}
+
+resource "http_step" "my_step2" {
+    ...
+}</pre>
+
+      <h3>Inputs</h3>
+
+      <ul>
+        <li><code>steps</code> &mdash; A list of <code>http_step</code> IDs to execute. The steps will be executed
+        in the order they are listed.</li>
+      </ul>
+
+      <h3>Outputs</h3>
+      <ul>
+        <li><code>id</code> - resource ID.</li>
+      </ul>
+
+    </div>

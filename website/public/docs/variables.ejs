@@ -1,0 +1,23 @@
+    <div class="bb-docs-section" id="variables">
+      <p>Variable blocks can be used to specify required inputs for your tests.</p>
+      <p>Use variable block to define a variable:</p>
+
+      <pre>variable "my_variable" { }</pre>
+
+      <p>Variables can also have default values associated with them:</p>
+
+      <pre>variable "my_variable" {
+  default = "some_value"
+}</pre>
+
+      <p>Default values can be overridden with shell environment when running
+      Bluebook CLI. Prefix variable name with <code>BVAR_</code> to override
+      default value.</p>
+
+      <pre>$ BVAR_my_variable=other_value bluebook run</pre>
+
+      <p>Variables can be accessed using interpolation syntax in BCL files:</p>
+
+      <pre>"${var.my_variable}"</pre>
+
+    </div>

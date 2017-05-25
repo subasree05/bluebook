@@ -1,0 +1,35 @@
+{
+  "globals": {
+    "page_header_title": "Documentation",
+    "page_header_description": "A more detailed look at how to use Bluebook and all its features."
+  },
+  "index": {
+    "layout": "../_layout_docs.ejs",
+    "page_title": "Documentation"
+  },
+  "getting-started": {
+    "layout": "../_layout_docs.ejs",
+    "sidenav_template": "_partials/getting-started-sidenav",
+    "page_header_title": "Getting started",
+    "page_header_description": "An overview of Bluebook, how to create and run your first test case.",
+    "page_title": "Getting started"
+  },
+  "variables": {
+    "page_header_title": "Variables",
+    "page_header_description": "Define global variables, reuse them across test cases.",
+    "page_title": "Variables",
+    "layout": "../_layout_docs.ejs"
+  },
+  "bcl": {
+    "page_header_title": "Bluebook Configuration Language",
+    "page_header_description": "Create API, integration and end-to-end tests with ease.",
+    "page_title": "Bluebook Configuration Language",
+    "layout": "../_layout_docs.ejs"
+  },
+  "cli": {
+    "page_header_title": "Bluebook Command Line Interface",
+    "page_header_description": "Execute tests written in Bluebook Configuration Language.",
+    "page_title": "Bluebook Command Line Interface",
+    "layout": "../_layout_docs.ejs"
+  }
+}

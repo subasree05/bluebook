@@ -1,0 +1,24 @@
+variable "server" {
+    default = "http://localhost"
+}
+
+resource "http_assertion" "status_200" {
+    source = "status_code"
+    comparison = "equals"
+    target = "200"
+}
+
+resource "http_step" "my_request" {
+    method = "GET"
+    url = "${var.server}/ping"
+
+    assertions = [
+        "${http_assertion.status_200.id}",
+    ]
+}
+
+resource "http_test" "my_test" {
+    steps = [
+        "${http_step.my_request.id}",
+    ]
+}

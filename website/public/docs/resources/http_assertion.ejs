@@ -1,0 +1,68 @@
+    <div class="bb-docs-section" id="variables">
+      <p>HTTP assertions can be used to validate HTTP responses.</p>
+
+      <h3>Example</h3>
+
+      <pre>resource "http_assertion" "my_assertion" {
+  source = "status_code"
+  comparison = "equals"
+  target = "200"
+}</pre>
+
+      <h3>Inputs</h3>
+
+      <ul>
+        <li><code>source</code> &ndash; location of the response value.</li>
+        <li><code>comparison</code> &ndash; comparison operation to perform on the source value.</li>
+        <li><code>target</code> &ndash; expected source value.</li>
+        <li><code>property</code> &ndash; property name of the source (<code>json_body</code> and <code>header</code> sources only).</li>
+      </ul>
+
+      <h4>Sources</h4>
+
+      <ul>
+        <li><code>status_code</code> &mdash; response status code.</li>
+        <li><code>header</code> &mdash; response header.</li>
+        <li><code>body</code> &mdash; response body.</li>
+        <li><code>json_body</code> &mdash; JSON response body.</li>
+      </ul>
+
+      <h4>Comparisons</h4>
+      <ul>
+        <li><code>less_than</code> &mdash; source value is less than target value.</li>
+        <li><code>less_than_or_equal</code> &mdash; source value is less than target value, or equals target value.</li>
+        <li><code>greater_than</code> &msash; source value is greater than target value.</li>
+        <li><code>greater_than_or_equal</code> &mdash; source value is greater than target value, or equals target value.</li>
+        <li><code>is_empty</code> &mdash; source value is empty or null.</li>
+        <li><code>is_not_empty</code> &mdash; source value is not empty.</li>
+        <li><code>equals</code> &mdash; source value equals target value (string comparison).</li>
+        <li><code>does_not_equal</code> &mdash; source value does not equal target value (string comparison).</li>
+        <li><code>contains</code> &mdash; source value contains target value (string comparison).</li>
+        <li><code>does_not_contain</code> &mdash; source value does not contain target value (string comparison).</li>
+        
+        <li><code>has_key</code> &mdash; test whether JSON dictionary located at property contains key specified in target. (<code>json_body</code> only.</li>
+        <li><code>has_value</code> &mdash; JSON array located at property contains item specified in target.</li>
+        <li><code>equals_number</code> &mdash; source value equals target value (<code>json_body</code> only; numeric comparison, <code>1 == 1.00</code>).</li>
+        <li><code>is_null</code> &mdash; JSON property is null (<code>json_body</code> only).</li>
+        <li><code>is_a_number</code> &mdash; JSON property is a number (<code>json_body</code> only).</li>
+      </ul>
+
+      <h4>Properties</h4>
+      <p>Property is an additional piece of information that some value sources require. Property is optional for <code>body</code> and <code>status_code</code> sources.</p>.
+
+      <p><code>header</code> source uses property to find HTTP header for comparison:</p>
+
+      <pre>source = "header"
+target = "Content-Type"</pre>
+
+      <p><code>json_body</code> source uses property to find attribute within JSON object:</p>
+
+      <pre>source = "json_body"
+target = "data.key[0]"</pre>
+
+      <h3>Outputs</h3>
+      <ul>
+        <li><code>id</code> - resource ID.</li>
+      </ul>
+
+    </div>
