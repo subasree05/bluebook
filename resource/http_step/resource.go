@@ -105,11 +105,11 @@ func New(node *bcl.BlockNode) (*Resource, error) {
 	}
 
 	if d.Method == "" {
-		return nil, fmt.Errorf("%s: `method` is required", d.Node.Ref())
+		return nil, fmt.Errorf("`method` is required")
 	}
 
 	if d.Url == "" {
-		return nil, fmt.Errorf("%s: `url` is required", d.Node.Ref())
+		return nil, fmt.Errorf("`url` is required")
 	}
 
 	return d, nil

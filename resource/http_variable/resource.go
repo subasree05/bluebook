@@ -67,15 +67,15 @@ func New(node *bcl.BlockNode) (*Resource, error) {
 
 func validateResource(r *Resource) error {
 	if r.source == "" {
-		return fmt.Errorf("%s: `source` is required", r.Node.Ref())
+		return fmt.Errorf("`source` is required")
 	}
 
 	if r.variable == "" {
-		return fmt.Errorf("%s: `variable` is required", r.Node.Ref())
+		return fmt.Errorf("`variable` is required")
 	}
 
 	if r.property == "" {
-		return fmt.Errorf("%s: `property` is required", r.Node.Ref())
+		return fmt.Errorf("`property` is required")
 	}
 
 	if r.source == "json_body" {
@@ -84,14 +84,12 @@ func validateResource(r *Resource) error {
 		}
 
 		if r.numeric_type != "int" && r.numeric_type != "float" {
-			return fmt.Errorf("%s: invalid `numeric_type` value, allowed values are 'int' and 'float'",
-				r.Node.Ref())
+			return fmt.Errorf("invalid `numeric_type` value, allowed values are 'int' and 'float'")
 		}
 	}
 
 	if r.source != "json_body" && r.source != "header" {
-		return fmt.Errorf("%s: invalid `source` value, allowed values are 'json_body' and 'header'",
-			r.Node.Ref())
+		return fmt.Errorf("invalid `source` value, allowed values are 'json_body' and 'header'")
 	}
 
 	return nil
@@ -133,11 +131,11 @@ func (r *Resource) Exec(ctx *resource.ExecutionContext) error {
 	} else if r.source == "json_body" {
 		value, err := captureJsonVariable(httpBody, property, r.numeric_type == "int")
 		if err != nil {
-			return fmt.Errorf("%s: %s", r.Node.Ref(), err.Error())
+			return err
 		}
 		ctx.SetVariable(variable, value)
 	} else {
-		return fmt.Errorf("%s: unsupported source type %q", r.Node.Ref())
+		return fmt.Errorf("unsupported source type")
 	}
 
 	return nil

@@ -63,15 +63,15 @@ func New(node *bcl.BlockNode) (*Resource, error) {
 
 func validateResource(r *Resource) error {
 	if r.source == "" {
-		return fmt.Errorf("%s: `source` is required", r.Node.Ref())
+		return fmt.Errorf("`source` is required")
 	}
 
 	if r.variable == "" {
-		return fmt.Errorf("%s: `variable` is required", r.Node.Ref())
+		return fmt.Errorf("`variable` is required")
 	}
 
 	if r.source != "time" {
-		return fmt.Errorf("%s: invalid `source` value")
+		return fmt.Errorf("invalid `source` value")
 	} else {
 		return validateTime(r)
 	}
@@ -91,8 +91,7 @@ func validateTime(r *Resource) error {
 	}
 
 	if !found {
-		return fmt.Errorf("%s: invalid `format` value for source %q",
-			r.Node.Ref(), r.source)
+		return fmt.Errorf("invalid `format` value for source %q", r.source)
 	}
 
 	return nil
@@ -132,8 +131,6 @@ func (r *Resource) Exec(ctx *resource.ExecutionContext) error {
 	case "rfc3339":
 		value = nowUtc.Format(time.RFC3339)
 	}
-
-	fmt.Printf("%v\n", value)
 
 	ctx.SetVariable(variable, value)
 	return nil
