@@ -6,3 +6,6 @@ setup:
 
 docker-build:
 	docker build -t bluebook_site .
+
+build:
+	docker run --rm -ti -v $(PWD):/site -w /site bluebook_site harp compile
