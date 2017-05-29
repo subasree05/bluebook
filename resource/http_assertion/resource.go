@@ -22,7 +22,7 @@ type Resource struct {
 	target     string
 }
 
-var comparisonsRequiringTarget = []string{
+var ComparisonsRequiringTarget = []string{
 	"equals",
 	"does_not_equal",
 	"contains",
@@ -34,9 +34,54 @@ var comparisonsRequiringTarget = []string{
 	"equals_number",
 }
 
-var sourceRequiringProperty = []string{
+var SourceRequiringProperty = []string{
 	"json_body",
 	"header",
+}
+
+var JSONBodyComparisons = []string{
+	"equals",
+	"does_not_equal",
+	"less_than",
+	"less_than_or_equal",
+	"greater_than",
+	"greater_than_or_equal",
+	"contains",
+	"does_not_contain",
+	"is_empty",
+	"is_not_empty",
+	"has_key",       // key exists in a dict
+	"has_value",     // has item in a list/dict
+	"equals_number", // use json.Number
+	"is_null",
+	"is_a_number",
+}
+
+var StatusCodeComparisons = []string{
+	"equals",
+	"does_not_equal",
+	"less_than",
+	"less_than_or_equal",
+	"greater_than",
+	"greater_than_or_equal",
+}
+
+var BodyComparisons = []string{
+	"is_empty",
+	"is_not_empty",
+	"equals",
+	"does_not_equal",
+	"contains",
+	"does_not_contain",
+}
+
+var HeaderComparisons = []string{
+	"is_empty",
+	"is_not_empty",
+	"equals",
+	"does_not_equal",
+	"contains",
+	"does_not_contain",
 }
 
 func New(node *bcl.BlockNode) (*Resource, error) {
@@ -84,7 +129,7 @@ func New(node *bcl.BlockNode) (*Resource, error) {
 }
 
 func (r *Resource) validate() error {
-	if r.property == "" && stringInSlice(r.source, sourceRequiringProperty) {
+	if r.property == "" && stringInSlice(r.source, SourceRequiringProperty) {
 		return r.errorf("missing `property`")
 	}
 
@@ -92,50 +137,13 @@ func (r *Resource) validate() error {
 
 	switch r.source {
 	case "json_body":
-		validComparisons = []string{
-			"equals",
-			"does_not_equal",
-			"less_than",
-			"less_than_or_equal",
-			"greater_than",
-			"greater_than_or_equal",
-			"contains",
-			"does_not_contain",
-			"is_empty",
-			"is_not_empty",
-			"has_key",       // key exists in a dict
-			"has_value",     // has item in a list/dict
-			"equals_number", // use json.Number
-			"is_null",
-			"is_a_number",
-		}
+		validComparisons = JSONBodyComparisons
 	case "status_code":
-		validComparisons = []string{
-			"equals",
-			"does_not_equal",
-			"less_than",
-			"less_than_or_equal",
-			"greater_than",
-			"greater_than_or_equal",
-		}
+		validComparisons = StatusCodeComparisons
 	case "body":
-		validComparisons = []string{
-			"is_empty",
-			"is_not_empty",
-			"equals",
-			"does_not_equal",
-			"contains",
-			"does_not_contain",
-		}
+		validComparisons = BodyComparisons
 	case "header":
-		validComparisons = []string{
-			"is_empty",
-			"is_not_empty",
-			"equals",
-			"does_not_equal",
-			"contains",
-			"does_not_contain",
-		}
+		validComparisons = HeaderComparisons
 	default:
 		return r.errorf("invalid `source` value %q", r.source)
 	}
@@ -144,7 +152,7 @@ func (r *Resource) validate() error {
 		return r.errorf("invalid `comparison` value %q", r.comparison)
 	}
 
-	if r.target == "" && stringInSlice(r.comparison, comparisonsRequiringTarget) {
+	if r.target == "" && stringInSlice(r.comparison, ComparisonsRequiringTarget) {
 		return r.errorf("invalid `target` value %q", r.target)
 	}
 
