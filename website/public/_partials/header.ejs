@@ -12,7 +12,12 @@
     <nav class="collapse navbar-collapse" id="bb-navbar">
       <ul class="nav navbar-nav">
         <li><a href="/docs/getting-started">Getting Started</a></li>
-        <li><a href="/docs/">Documentation</a></li>
+        <li>
+          <a href="/docs/">Documentation</a>
+          <ul class="hidden-md hidden-lg">
+            <%- partial(locals.sidenav_template || "./docs-sidenav") %>
+          </ul>
+        </li>
         <li><a href="https://github.com/bluebookrun/bluebook">GitHub</a></li>
       </ul>
     </nav>
